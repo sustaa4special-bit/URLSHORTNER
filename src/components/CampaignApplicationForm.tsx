@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom"; // Import Link
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,18 +13,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { showSuccess, showError } from "@/utils/toast"; // Using existing toast utilities
+import { showSuccess, showError } from "@/utils/toast";
 
 interface CampaignApplicationFormProps {
   campaignId: string;
   campaignHeadline: string;
   onClose: () => void;
+  onApplicationSuccess: () => void; // New callback prop
 }
 
 const CampaignApplicationForm: React.FC<CampaignApplicationFormProps> = ({
   campaignId,
   campaignHeadline,
   onClose,
+  onApplicationSuccess, // Destructure new prop
 }) => {
   const [socialHandle, setSocialHandle] = useState("");
   const [portfolioLink, setPortfolioLink] = useState("");
@@ -55,6 +57,7 @@ const CampaignApplicationForm: React.FC<CampaignApplicationFormProps> = ({
     showSuccess(`Application for "${campaignHeadline}" submitted successfully!`);
     setIsSubmitting(false);
     onClose(); // Close the dialog after submission
+    onApplicationSuccess(); // Call the success callback
   };
 
   return (

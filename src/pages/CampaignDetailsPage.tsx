@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react"; // Import useState
+import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Instagram, Youtube, Video, DollarSign, CalendarDays, Users, CheckCircle } from "lucide-react";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog"; // Import Dialog components
-import CampaignApplicationForm from "@/components/CampaignApplicationForm"; // Import the new form
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import CampaignApplicationForm from "@/components/CampaignApplicationForm";
 
 interface Campaign {
   id: string;
@@ -173,7 +173,8 @@ const getPlatformIcon = (platform: 'TikTok' | 'Instagram' | 'YouTube Shorts') =>
 const CampaignDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const campaign = allCampaigns.find((c) => c.id === id);
-  const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog open/close
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [hasApplied, setHasApplied] = useState(false); // New state to track application status
 
   if (!campaign) {
     return (
@@ -199,6 +200,12 @@ const CampaignDetailsPage = () => {
       : campaign.status === 'Closing Soon'
       ? 'bg-yellow-500/20 text-yellow-400'
       : 'bg-gray-500/20 text-gray-400';
+
+  const handleApplicationSuccess = () => {
+    setHasApplied(true);
+    // In a real application, you would also update a global state or refetch data
+    // to ensure the CreatorDashboardPage reflects this new application.
+  };
 
   return (
     <Layout>
@@ -281,18 +288,27 @@ const CampaignDetailsPage = () => {
               </div>
 
               <div className="pt-6">
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-full text-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-                      Apply Now
-                    </Button>
-                  </DialogTrigger>
-                  <CampaignApplicationForm
-                    campaignId={campaign.id}
-                    campaignHeadline={campaign.headline}
-                    onClose={() => setIsDialogOpen(false)}
-                  />
-                </Dialog>
+                {hasApplied ? (
+                  <Button asChild className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-semibold py-3 px-8 rounded-full text-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                    <Link to="/creator-dashboard">
+                      View Application Status <ArrowRight className="ml-2 h-5 w-5 inline-block" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-full text-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                        Apply Now
+                      </Button>
+                    </DialogTrigger>
+                    <CampaignApplicationForm
+                      campaignId={campaign.id}
+                      campaignHeadline={campaign.headline}
+                      onClose={() => setIsDialogOpen(false)}
+                      onApplicationSuccess={handleApplicationSuccess} // Pass the callback
+                    />
+                  </Dialog>
+                )}
               </div>
             </CardContent>
           </Card>
