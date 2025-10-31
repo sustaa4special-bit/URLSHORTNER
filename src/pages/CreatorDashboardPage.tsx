@@ -11,10 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogTrigger } from "@/components/ui/dialog"; // Import Dialog components
-import SubmitClipForm from "@/components/SubmitClipForm"; // Import new component
-import { ArrowRight, Filter, Search, XCircle, DollarSign, CheckCircle, Clock } from "lucide-react"; // Added icons
-import { getAppliedCampaigns } from "@/utils/appliedCampaigns";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import SubmitClipForm from "@/components/SubmitClipForm";
+import { ArrowRight, Filter, Search, XCircle, DollarSign, CheckCircle, Clock, AlertTriangle, Loader2 } from "lucide-react";
+import { getAppliedCampaigns, getAppliedCampaignById } from "@/utils/appliedCampaigns";
+import { useWallet } from "@/hooks/use-wallet"; // Import useWallet
 
 interface AppliedCampaign {
   id: string;
@@ -23,8 +24,9 @@ interface AppliedCampaign {
   payout: string;
   payoutValue: number;
   applicationDate: Date;
-  status: 'Pending Review' | 'Approved' | 'Rejected' | 'Completed' | 'Submitted';
+  status: 'Pending Review' | 'Approved' | 'Rejected' | 'Completed' | 'Submitted' | 'Under Manual Review';
   clipUrl?: string;
+  verificationReason?: string;
 }
 
 const CreatorDashboardPage = () => {
@@ -35,8 +37,9 @@ const CreatorDashboardPage = () => {
   const [isSubmitClipDialogOpen, setIsSubmitClipDialogOpen] = useState(false);
   const [selectedCampaignForSubmission, setSelectedCampaignForSubmission] = useState<AppliedCampaign | null>(null);
 
+  const { totalEarnings } = useWallet(); // Use the useWallet hook
 
-  const allStatuses = ['Pending Review', 'Approved', 'Rejected', 'Completed', 'Submitted'];
+  const allStatuses = ['Pending Review', 'Approved', 'Rejected', 'Completed', 'Submitted', 'Under Manual Review'];
 
   useEffect(() => {
     setAppliedCampaigns(getAppliedCampaigns());
@@ -56,7 +59,8 @@ const CreatorDashboardPage = () => {
   };
 
   const handleClipSubmissionSuccess = () => {
-    setAppliedCampaigns(getAppliedCampaigns()); // Refresh campaigns after submission
+    // Re-fetch campaigns to update the status after submission
+    setAppliedCampaigns(getAppliedCampaigns());
     setIsSubmitClipDialogOpen(false);
     setSelectedCampaignForSubmission(null);
   };
@@ -89,15 +93,12 @@ const CreatorDashboardPage = () => {
   }, [appliedCampaigns, searchTerm, selectedStatuses, sortBy]);
 
   // Dashboard Summary Calculations
-  const totalEarnings = appliedCampaigns
-    .filter(c => c.status === 'Completed')
-    .reduce((sum, c) => sum + c.payoutValue, 0);
-
+  // totalEarnings now comes from useWallet hook
   const pendingPayouts = appliedCampaigns
-    .filter(c => c.status === 'Approved' || c.status === 'Submitted')
+    .filter(c => ['Approved', 'Submitted', 'Under Manual Review'].includes(c.status))
     .reduce((sum, c) => sum + c.payoutValue, 0);
 
-  const activeCampaigns = appliedCampaigns.filter(c => c.status === 'Approved' || c.status === 'Submitted').length;
+  const activeCampaigns = appliedCampaigns.filter(c => ['Approved', 'Submitted', 'Under Manual Review'].includes(c.status)).length;
 
 
   return (
@@ -228,21 +229,31 @@ const CreatorDashboardPage = () => {
                     <TableBody>
                       {filteredAndSortedCampaigns.map((campaign) => {
                         let statusColor = '';
+                        let statusIcon = null;
                         switch (campaign.status) {
                           case 'Approved':
                             statusColor = 'bg-green-500/20 text-green-400';
+                            statusIcon = <CheckCircle className="h-3 w-3 mr-1" />;
                             break;
                           case 'Pending Review':
                             statusColor = 'bg-yellow-500/20 text-yellow-400';
+                            statusIcon = <Hourglass className="h-3 w-3 mr-1" />;
                             break;
                           case 'Rejected':
                             statusColor = 'bg-red-500/20 text-red-400';
+                            statusIcon = <XCircle className="h-3 w-3 mr-1" />;
                             break;
                           case 'Completed':
                             statusColor = 'bg-blue-500/20 text-blue-400';
+                            statusIcon = <CheckCircle className="h-3 w-3 mr-1" />;
                             break;
                           case 'Submitted':
                             statusColor = 'bg-indigo-500/20 text-indigo-400';
+                            statusIcon = <Loader2 className="h-3 w-3 mr-1 animate-spin" />;
+                            break;
+                          case 'Under Manual Review':
+                            statusColor = 'bg-orange-500/20 text-orange-400';
+                            statusIcon = <AlertTriangle className="h-3 w-3 mr-1" />;
                             break;
                           default:
                             statusColor = 'bg-gray-500/20 text-gray-400';
@@ -255,9 +266,12 @@ const CreatorDashboardPage = () => {
                             <TableCell className="text-indigo-400">{campaign.payout}</TableCell>
                             <TableCell className="text-gray-400">{campaign.applicationDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</TableCell>
                             <TableCell className="text-center">
-                              <Badge className={`${statusColor} text-xs px-2 py-1 rounded-full`}>
-                                {campaign.status}
+                              <Badge className={`${statusColor} text-xs px-2 py-1 rounded-full flex items-center justify-center`}>
+                                {statusIcon} {campaign.status}
                               </Badge>
+                              {campaign.verificationReason && (
+                                <p className="text-red-400 text-xs mt-1">{campaign.verificationReason}</p>
+                              )}
                             </TableCell>
                             <TableCell className="text-right">
                               {campaign.status === 'Approved' ? (
@@ -276,6 +290,7 @@ const CreatorDashboardPage = () => {
                                     <SubmitClipForm
                                       campaignId={selectedCampaignForSubmission.id}
                                       campaignHeadline={selectedCampaignForSubmission.headline}
+                                      campaignPayoutValue={selectedCampaignForSubmission.payoutValue}
                                       onClose={() => setIsSubmitClipDialogOpen(false)}
                                       onSubmitSuccess={handleClipSubmissionSuccess}
                                     />

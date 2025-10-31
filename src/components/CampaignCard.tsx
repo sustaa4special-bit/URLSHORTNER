@@ -4,7 +4,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Instagram, Youtube, Video } from "lucide-react";
+import { ArrowRight, Instagram, Youtube, Video, CheckCircle } from "lucide-react"; // Import CheckCircle
 import { Badge } from "@/components/ui/badge";
 
 interface Campaign {
