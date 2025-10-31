@@ -1,5 +1,7 @@
 "use client";
 
+import { addPayoutTransaction } from "./walletData"; // Import the new function
+
 interface AppliedCampaign {
   id: string;
   brandName: string;
@@ -125,7 +127,7 @@ export const updateAppliedCampaign = (
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedCampaigns));
 };
 
-export const simulateVerification = (campaignId: string, clipUrl: string, platform: AppliedCampaign['submittedPlatform'], payoutValue: number) => {
+export const simulateVerification = (campaignId: string, clipUrl: string, platform: AppliedCampaign['submittedPlatform'], payoutValue: number, campaignHeadline: string, brandName: string) => {
   if (typeof window === "undefined") {
     return;
   }
@@ -142,18 +144,40 @@ export const simulateVerification = (campaignId: string, clipUrl: string, platfo
   setTimeout(() => {
     const random = Math.random();
     let newStatus: AppliedCampaign['status'];
+    let payoutStatus: PayoutStatus;
     let reason: string | undefined;
 
     if (random < 0.6) { // 60% chance of approval
       newStatus = 'Approved';
-      // Simulate adding to wallet
+      payoutStatus = 'Approved';
+      // Add payout transaction
+      addPayoutTransaction({
+        campaignId,
+        campaignHeadline,
+        amount: payoutValue,
+        platform: platform!,
+        status: 'Approved',
+      });
+      // Simulate adding to wallet (this is now handled by addPayoutTransaction implicitly via getWalletSummary)
+      // For useWallet hook, we still update total earnings directly for consistency with its current implementation
       const currentEarnings = parseFloat(localStorage.getItem(LOCAL_STORAGE_EARNINGS_KEY) || '0');
       localStorage.setItem(LOCAL_STORAGE_EARNINGS_KEY, (currentEarnings + payoutValue).toFixed(2));
+
     } else if (random < 0.8) { // 20% chance of manual review
       newStatus = 'Under Manual Review';
+      payoutStatus = 'Pending';
       reason = 'Content requires manual review for authenticity.';
+      // Add pending payout transaction
+      addPayoutTransaction({
+        campaignId,
+        campaignHeadline,
+        amount: payoutValue,
+        platform: platform!,
+        status: 'Pending',
+      });
     } else { // 20% chance of rejection
       newStatus = 'Rejected';
+      payoutStatus = 'Rejected';
       const reasons = [
         'Missing required hashtag #GlowifyMorningGlow',
         'Post is not public',
@@ -162,6 +186,15 @@ export const simulateVerification = (campaignId: string, clipUrl: string, platfo
         'Product not clearly visible',
       ];
       reason = reasons[Math.floor(Math.random() * reasons.length)];
+      // Add rejected payout transaction
+      addPayoutTransaction({
+        campaignId,
+        campaignHeadline,
+        amount: payoutValue,
+        platform: platform!,
+        status: 'Rejected',
+        verificationReason: reason,
+      });
     }
 
     updateAppliedCampaign(campaignId, {
@@ -173,6 +206,12 @@ export const simulateVerification = (campaignId: string, clipUrl: string, platfo
     if (newStatus === 'Approved') {
       setTimeout(() => {
         updateAppliedCampaign(campaignId, { status: 'Completed' });
+        // Also update the payout transaction to 'Paid Out' after completion
+        const payouts = getPayoutTransactions();
+        const payoutToUpdate = payouts.find(p => p.campaignId === campaignId && p.status === 'Approved');
+        if (payoutToUpdate) {
+          updatePayoutTransactionStatus(payoutToUpdate.id, 'Paid Out');
+        }
       }, 3000); // Mark as completed after 3 seconds
     }
 
