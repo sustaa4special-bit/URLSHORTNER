@@ -25,6 +25,8 @@ import AdminFraudAlertsPage from "./pages/admin/AdminFraudAlertsPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
 // Analytics Page
 import AnalyticsDashboardPage from "./pages/AnalyticsDashboardPage";
+// User Profile Page
+import UserProfilePage from "./pages/UserProfilePage";
 
 
 const queryClient = new QueryClient();
@@ -46,7 +48,8 @@ const App = () => (
           <Route path="/campaigns/:id" element={<CampaignDetailsPage />} />
           <Route path="/creator-dashboard" element={<CreatorDashboardPage />} />
           <Route path="/wallet" element={<CreatorWalletPage />} />
-          <Route path="/analytics" element={<AnalyticsDashboardPage />} /> {/* New Analytics Route */}
+          <Route path="/analytics" element={<AnalyticsDashboardPage />} />
+          <Route path="/profile" element={<UserProfilePage />} /> {/* New User Profile Route */}
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboardPage />} />
