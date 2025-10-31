@@ -38,6 +38,11 @@ const MobileNav = () => {
             </Link>
           </SheetClose>
           <SheetClose asChild>
+            <Link to="/explore-campaigns" className="hover:text-indigo-400 transition-colors text-left">
+              Explore Campaigns
+            </Link>
+          </SheetClose>
+          <SheetClose asChild>
             <Link to="/how-it-works" className="hover:text-indigo-400 transition-colors text-left">
               How It Works
             </Link>

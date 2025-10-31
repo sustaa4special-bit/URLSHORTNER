@@ -21,6 +21,9 @@ const Navbar = () => {
         <Link to="/creators" className="text-gray-300 hover:text-white transition-colors">
           Creators
         </Link>
+        <Link to="/explore-campaigns" className="text-gray-300 hover:text-white transition-colors">
+          Explore Campaigns
+        </Link>
         <Link to="/how-it-works" className="text-gray-300 hover:text-white transition-colors">
           How It Works
         </Link>
