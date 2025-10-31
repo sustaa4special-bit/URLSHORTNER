@@ -26,6 +26,7 @@ import {
   PayoutStatus,
 } from "@/utils/walletData";
 import { Link } from "react-router-dom";
+import { Badge } from "@/components/ui/badge"; // Import Badge component
 
 const MIN_WITHDRAWAL_AMOUNT = 50;
 const PAYOUT_THRESHOLD = 50; // Example threshold for progress bar
