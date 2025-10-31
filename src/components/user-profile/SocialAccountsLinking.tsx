@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { UserProfile, SocialPlatform, connectSocialAccount, disconnectSocialAccount } from "@/utils/userData";
-import { TikTok, Instagram, Youtube, Twitter, Twitch, Link as LinkIcon, CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { Instagram, Youtube, Twitter, Twitch, Link as LinkIcon, CheckCircle, XCircle, Loader2, Video } from "lucide-react"; // Import Video icon
 import { motion } from "framer-motion";
 import { showSuccess, showError } from "@/utils/toast";
 
@@ -33,7 +33,7 @@ const SocialAccountsLinking: React.FC<SocialAccountsLinkingProps> = ({ userProfi
   const [isConnecting, setIsConnecting] = useState(false);
 
   const socialPlatforms: { platform: SocialPlatform; name: string; icon: React.ElementType }[] = [
-    { platform: 'TikTok', name: 'TikTok', icon: TikTok },
+    { platform: 'TikTok', name: 'TikTok', icon: Video }, // Using Video icon for TikTok
     { platform: 'Instagram', name: 'Instagram', icon: Instagram },
     { platform: 'YouTube Shorts', name: 'YouTube Shorts', icon: Youtube },
     { platform: 'Twitter', name: 'Twitter (X)', icon: Twitter },
@@ -157,9 +157,7 @@ const SocialAccountsLinking: React.FC<SocialAccountsLinkingProps> = ({ userProfi
             );
           })}
         </CardContent>
-      </Card>
 
-      {/* Connect Social Account Dialog */}
       <Dialog open={isConnectDialogOpen} onOpenChange={setIsConnectDialogOpen}>
         <DialogContent className="sm:max-w-[425px] bg-gray-900 text-white border-gray-700">
           <DialogHeader>
