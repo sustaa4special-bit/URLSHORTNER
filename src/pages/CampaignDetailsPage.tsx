@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Import useEffect
 import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Instagram, Youtube, Video, DollarSign, CalendarDays, Users, CheckCircle } from "lucide-react";
+import { ArrowLeft, Instagram, Youtube, Video, DollarSign, CalendarDays, Users, CheckCircle, ArrowRight } from "lucide-react";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import CampaignApplicationForm from "@/components/CampaignApplicationForm";
+import { addAppliedCampaign, isCampaignApplied } from "@/utils/appliedCampaigns"; // Import utility functions
 
 interface Campaign {
   id: string;
@@ -174,7 +175,13 @@ const CampaignDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const campaign = allCampaigns.find((c) => c.id === id);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [hasApplied, setHasApplied] = useState(false); // New state to track application status
+  const [hasApplied, setHasApplied] = useState(false);
+
+  useEffect(() => {
+    if (campaign?.id) {
+      setHasApplied(isCampaignApplied(campaign.id));
+    }
+  }, [campaign?.id]);
 
   if (!campaign) {
     return (
@@ -202,9 +209,15 @@ const CampaignDetailsPage = () => {
       : 'bg-gray-500/20 text-gray-400';
 
   const handleApplicationSuccess = () => {
+    addAppliedCampaign({
+      id: campaign.id,
+      brandName: campaign.brandName,
+      headline: campaign.headline,
+      payout: campaign.payout,
+      payoutValue: campaign.payoutValue,
+    });
     setHasApplied(true);
-    // In a real application, you would also update a global state or refetch data
-    // to ensure the CreatorDashboardPage reflects this new application.
+    setIsDialogOpen(false); // Close dialog after successful application
   };
 
   return (
@@ -305,7 +318,7 @@ const CampaignDetailsPage = () => {
                       campaignId={campaign.id}
                       campaignHeadline={campaign.headline}
                       onClose={() => setIsDialogOpen(false)}
-                      onApplicationSuccess={handleApplicationSuccess} // Pass the callback
+                      onApplicationSuccess={handleApplicationSuccess}
                     />
                   </Dialog>
                 )}

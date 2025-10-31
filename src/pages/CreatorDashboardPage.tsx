@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react"; // Import useEffect
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,6 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowRight, Filter, Search, XCircle } from "lucide-react";
+import { getAppliedCampaigns } from "@/utils/appliedCampaigns"; // Import utility function
 
 interface AppliedCampaign {
   id: string;
@@ -23,70 +24,18 @@ interface AppliedCampaign {
   status: 'Pending Review' | 'Approved' | 'Rejected' | 'Completed';
 }
 
-// Mock data for applied campaigns
-const initialAppliedCampaigns: AppliedCampaign[] = [
-  {
-    id: "campaign-1",
-    brandName: "Glowify Skincare",
-    headline: "Create a skincare reel showing morning glow results",
-    payout: "$25 per approved clip",
-    payoutValue: 25,
-    applicationDate: new Date("2025-10-28"),
-    status: 'Pending Review',
-  },
-  {
-    id: "campaign-3",
-    brandName: "Blendr Energy",
-    headline: "Showcase Blendr Energy drink in your workout routine",
-    payout: "$15 per approved clip",
-    payoutValue: 15,
-    applicationDate: new Date("2025-10-25"),
-    status: 'Approved',
-  },
-  {
-    id: "campaign-6",
-    brandName: "PetPal Treats",
-    headline: "Show your pet enjoying our new healthy treats",
-    payout: "$20 per approved clip",
-    payoutValue: 20,
-    applicationDate: new Date("2025-10-20"),
-    status: 'Rejected',
-  },
-  {
-    id: "campaign-4",
-    brandName: "EcoWear Apparel",
-    headline: "Sustainable fashion haul for your audience",
-    payout: "$50 fixed fee",
-    payoutValue: 50,
-    applicationDate: new Date("2025-10-15"),
-    status: 'Completed',
-  },
-  {
-    id: "campaign-2",
-    brandName: "Nova Tech",
-    headline: "Review our new smart home device on Instagram",
-    payout: "$0.03 per view",
-    payoutValue: 0.03,
-    applicationDate: new Date("2025-11-01"),
-    status: 'Pending Review',
-  },
-  {
-    id: "campaign-5",
-    brandName: "GameSphere Studios",
-    headline: "First look at our new indie game on YouTube Shorts",
-    payout: "$0.05 per view",
-    payoutValue: 0.05,
-    applicationDate: new Date("2025-09-30"),
-    status: 'Approved',
-  },
-];
-
 const CreatorDashboardPage = () => {
+  const [appliedCampaigns, setAppliedCampaigns] = useState<AppliedCampaign[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("Newest Application");
 
   const allStatuses = ['Pending Review', 'Approved', 'Rejected', 'Completed'];
+
+  useEffect(() => {
+    // Load campaigns from localStorage when the component mounts
+    setAppliedCampaigns(getAppliedCampaigns());
+  }, []);
 
   const handleStatusChange = (status: string, checked: boolean) => {
     setSelectedStatuses((prev) =>
@@ -98,10 +47,11 @@ const CreatorDashboardPage = () => {
     setSearchTerm("");
     setSelectedStatuses([]);
     setSortBy("Newest Application");
+    setAppliedCampaigns(getAppliedCampaigns()); // Reset to initial loaded state
   };
 
   const filteredAndSortedCampaigns = useMemo(() => {
-    let filtered = initialAppliedCampaigns.filter((campaign) => {
+    let filtered = appliedCampaigns.filter((campaign) => {
       const matchesSearch = searchTerm
         ? campaign.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           campaign.headline.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,7 +76,7 @@ const CreatorDashboardPage = () => {
     }
 
     return filtered;
-  }, [searchTerm, selectedStatuses, sortBy]);
+  }, [appliedCampaigns, searchTerm, selectedStatuses, sortBy]);
 
   return (
     <Layout>
