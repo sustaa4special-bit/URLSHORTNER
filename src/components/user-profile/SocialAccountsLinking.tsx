@@ -15,14 +15,14 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { UserProfile, SocialPlatform, connectSocialAccount, disconnectSocialAccount } from "@/utils/userData";
-import { Instagram, Youtube, Twitter, Twitch, Link as LinkIcon, CheckCircle, XCircle, Loader2, Video } from "lucide-react"; // Import Video icon
-import { motion } from "framer-motion"; // <--- ADDED THIS IMPORT
+import { Instagram, Youtube, Twitter, Twitch, Link as LinkIcon, CheckCircle, XCircle, Loader2, Video } from "lucide-react";
+import { motion } from "framer-motion"; // Confirmed: This import is crucial and must be here
 import { showSuccess, showError } from "@/utils/toast";
 
 interface SocialAccountsLinkingProps {
   userProfile: UserProfile;
-  onUpdate: (updates: Partial<UserProfile>) => void; // To trigger parent refresh
-  onRefresh: () => void; // To trigger full data refresh
+  onUpdate: (updates: Partial<UserProfile>) => void;
+  onRefresh: () => void;
 }
 
 const SocialAccountsLinking: React.FC<SocialAccountsLinkingProps> = ({ userProfile, onUpdate, onRefresh }) => {
@@ -33,7 +33,7 @@ const SocialAccountsLinking: React.FC<SocialAccountsLinkingProps> = ({ userProfi
   const [isConnecting, setIsConnecting] = useState(false);
 
   const socialPlatforms: { platform: SocialPlatform; name: string; icon: React.ElementType }[] = [
-    { platform: 'TikTok', name: 'TikTok', icon: Video }, // Using Video icon for TikTok
+    { platform: 'TikTok', name: 'TikTok', icon: Video },
     { platform: 'Instagram', name: 'Instagram', icon: Instagram },
     { platform: 'YouTube Shorts', name: 'YouTube Shorts', icon: Youtube },
     { platform: 'Twitter', name: 'Twitter (X)', icon: Twitter },
@@ -61,12 +61,12 @@ const SocialAccountsLinking: React.FC<SocialAccountsLinkingProps> = ({ userProfi
     }
 
     setIsConnecting(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500)); // Simulate API call
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
     try {
       connectSocialAccount(selectedPlatform, socialHandle, parsedFollowers);
       showSuccess(`${selectedPlatform} connected successfully!`);
-      onRefresh(); // Refresh parent state
+      onRefresh();
       setIsConnectDialogOpen(false);
     } catch (error) {
       showError(`Failed to connect ${selectedPlatform}.`);
@@ -78,11 +78,11 @@ const SocialAccountsLinking: React.FC<SocialAccountsLinkingProps> = ({ userProfi
 
   const handleDisconnect = async (platform: SocialPlatform) => {
     if (window.confirm(`Are you sure you want to disconnect your ${platform} account?`)) {
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       try {
         disconnectSocialAccount(platform);
         showSuccess(`${platform} disconnected.`);
-        onRefresh(); // Refresh parent state
+        onRefresh();
       } catch (error) {
         showError(`Failed to disconnect ${platform}.`);
         console.error("Social disconnect error:", error);
@@ -165,7 +165,7 @@ const SocialAccountsLinking: React.FC<SocialAccountsLinkingProps> = ({ userProfi
             <DialogDescription className="text-gray-400">
               Enter your {selectedPlatform} handle and current follower count.
             </DialogDescription>
-          </DialogHeader>
+          </DialogDescription>
           <form onSubmit={handleConnectSubmit} className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="socialHandle" className="text-gray-300">
