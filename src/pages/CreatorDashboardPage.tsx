@@ -1,31 +1,37 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo } from "react";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowRight, Filter, Search, XCircle } from "lucide-react";
 
 interface AppliedCampaign {
   id: string;
   brandName: string;
   headline: string;
   payout: string;
-  applicationDate: string;
+  payoutValue: number; // Added for sorting
+  applicationDate: Date; // Changed to Date object for sorting
   status: 'Pending Review' | 'Approved' | 'Rejected' | 'Completed';
 }
 
 // Mock data for applied campaigns
-const mockAppliedCampaigns: AppliedCampaign[] = [
+const initialAppliedCampaigns: AppliedCampaign[] = [
   {
     id: "campaign-1",
     brandName: "Glowify Skincare",
     headline: "Create a skincare reel showing morning glow results",
     payout: "$25 per approved clip",
-    applicationDate: "Oct 28, 2025",
+    payoutValue: 25,
+    applicationDate: new Date("2025-10-28"),
     status: 'Pending Review',
   },
   {
@@ -33,7 +39,8 @@ const mockAppliedCampaigns: AppliedCampaign[] = [
     brandName: "Blendr Energy",
     headline: "Showcase Blendr Energy drink in your workout routine",
     payout: "$15 per approved clip",
-    applicationDate: "Oct 25, 2025",
+    payoutValue: 15,
+    applicationDate: new Date("2025-10-25"),
     status: 'Approved',
   },
   {
@@ -41,7 +48,8 @@ const mockAppliedCampaigns: AppliedCampaign[] = [
     brandName: "PetPal Treats",
     headline: "Show your pet enjoying our new healthy treats",
     payout: "$20 per approved clip",
-    applicationDate: "Oct 20, 2025",
+    payoutValue: 20,
+    applicationDate: new Date("2025-10-20"),
     status: 'Rejected',
   },
   {
@@ -49,12 +57,77 @@ const mockAppliedCampaigns: AppliedCampaign[] = [
     brandName: "EcoWear Apparel",
     headline: "Sustainable fashion haul for your audience",
     payout: "$50 fixed fee",
-    applicationDate: "Oct 15, 2025",
+    payoutValue: 50,
+    applicationDate: new Date("2025-10-15"),
     status: 'Completed',
+  },
+  {
+    id: "campaign-2",
+    brandName: "Nova Tech",
+    headline: "Review our new smart home device on Instagram",
+    payout: "$0.03 per view",
+    payoutValue: 0.03,
+    applicationDate: new Date("2025-11-01"),
+    status: 'Pending Review',
+  },
+  {
+    id: "campaign-5",
+    brandName: "GameSphere Studios",
+    headline: "First look at our new indie game on YouTube Shorts",
+    payout: "$0.05 per view",
+    payoutValue: 0.05,
+    applicationDate: new Date("2025-09-30"),
+    status: 'Approved',
   },
 ];
 
 const CreatorDashboardPage = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<string>("Newest Application");
+
+  const allStatuses = ['Pending Review', 'Approved', 'Rejected', 'Completed'];
+
+  const handleStatusChange = (status: string, checked: boolean) => {
+    setSelectedStatuses((prev) =>
+      checked ? [...prev, status] : prev.filter((s) => s !== status)
+    );
+  };
+
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setSelectedStatuses([]);
+    setSortBy("Newest Application");
+  };
+
+  const filteredAndSortedCampaigns = useMemo(() => {
+    let filtered = initialAppliedCampaigns.filter((campaign) => {
+      const matchesSearch = searchTerm
+        ? campaign.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          campaign.headline.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          campaign.payout.toLowerCase().includes(searchTerm.toLowerCase())
+        : true;
+
+      const matchesStatus =
+        selectedStatuses.length > 0
+          ? selectedStatuses.includes(campaign.status)
+          : true;
+
+      return matchesSearch && matchesStatus;
+    });
+
+    // Sorting logic
+    if (sortBy === "Newest Application") {
+      filtered.sort((a, b) => b.applicationDate.getTime() - a.applicationDate.getTime());
+    } else if (sortBy === "Oldest Application") {
+      filtered.sort((a, b) => a.applicationDate.getTime() - b.applicationDate.getTime());
+    } else if (sortBy === "Highest Payout") {
+      filtered.sort((a, b) => b.payoutValue - a.payoutValue);
+    }
+
+    return filtered;
+  }, [searchTerm, selectedStatuses, sortBy]);
+
   return (
     <Layout>
       <div className="min-h-screen bg-gray-950 text-white p-6 md:p-12">
@@ -66,9 +139,68 @@ const CreatorDashboardPage = () => {
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8 animate-in fade-in-0 slide-in-from-top-6 duration-700 delay-100">
               Manage your campaign applications and track your earnings.
             </p>
+            <div className="relative max-w-xl mx-auto mb-8">
+              <Input
+                type="text"
+                placeholder="Search your applied campaigns..."
+                className="w-full bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 py-3 pl-10 pr-4 rounded-full shadow-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 animate-in fade-in-0 zoom-in-95 duration-700 delay-200"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            </div>
           </div>
 
-          <Card className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 text-white shadow-xl p-6 md:p-8 animate-in fade-in-0 slide-in-from-bottom-8 duration-700 delay-200">
+          {/* Filter and Sort Bar */}
+          <div className="bg-gray-900/70 backdrop-blur-lg rounded-xl p-6 md:p-8 border border-gray-800 shadow-lg mb-12 animate-in fade-in-0 slide-in-from-bottom-8 duration-700 delay-300">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-white flex items-center">
+                <Filter className="h-6 w-6 mr-3 text-indigo-400" /> Filters & Sort
+              </h2>
+              <Button variant="ghost" onClick={handleResetFilters} className="text-gray-400 hover:text-white hover:bg-gray-700">
+                <XCircle className="h-4 w-4 mr-2" /> Reset Filters
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Status Filter */}
+              <div>
+                <Label className="text-gray-300 mb-2 block">Status</Label>
+                <div className="space-y-2">
+                  {allStatuses.map((status) => (
+                    <div key={status} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`status-${status}`}
+                        checked={selectedStatuses.includes(status)}
+                        onCheckedChange={(checked) => handleStatusChange(status, checked as boolean)}
+                        className="border-gray-600 data-[state=checked]:bg-indigo-600 data-[state=checked]:text-white"
+                      />
+                      <Label htmlFor={`status-${status}`} className="text-gray-200 cursor-pointer">
+                        {status}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sort By */}
+              <div>
+                <Label className="text-gray-300 mb-2 block">Sort By</Label>
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white hover:border-indigo-500 transition-colors">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
+                    <SelectItem value="Newest Application" className="hover:bg-gray-700 focus:bg-gray-700">Newest Application</SelectItem>
+                    <SelectItem value="Oldest Application" className="hover:bg-gray-700 focus:bg-gray-700">Oldest Application</SelectItem>
+                    <SelectItem value="Highest Payout" className="hover:bg-gray-700 focus:bg-gray-700">Highest Payout</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          <Card className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 text-white shadow-xl p-6 md:p-8 animate-in fade-in-0 slide-in-from-bottom-8 duration-700 delay-400">
             <CardHeader className="px-0 pt-0 pb-4">
               <CardTitle className="text-2xl font-bold text-white">Your Applied Campaigns</CardTitle>
               <CardDescription className="text-gray-400">
@@ -76,9 +208,9 @@ const CreatorDashboardPage = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="px-0 py-0">
-              {mockAppliedCampaigns.length === 0 ? (
+              {filteredAndSortedCampaigns.length === 0 ? (
                 <div className="text-center text-gray-400 py-8">
-                  You haven't applied to any campaigns yet.{" "}
+                  No campaigns found matching your criteria.{" "}
                   <Link to="/explore-campaigns" className="text-indigo-400 hover:underline">
                     Explore campaigns
                   </Link> to get started!
@@ -97,7 +229,7 @@ const CreatorDashboardPage = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {mockAppliedCampaigns.map((campaign) => {
+                      {filteredAndSortedCampaigns.map((campaign) => {
                         let statusColor = '';
                         switch (campaign.status) {
                           case 'Approved':
@@ -121,7 +253,7 @@ const CreatorDashboardPage = () => {
                             <TableCell className="font-medium text-white">{campaign.brandName}</TableCell>
                             <TableCell className="text-gray-300">{campaign.headline}</TableCell>
                             <TableCell className="text-indigo-400">{campaign.payout}</TableCell>
-                            <TableCell className="text-gray-400">{campaign.applicationDate}</TableCell>
+                            <TableCell className="text-gray-400">{campaign.applicationDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</TableCell>
                             <TableCell className="text-center">
                               <Badge className={`${statusColor} text-xs px-2 py-1 rounded-full`}>
                                 {campaign.status}
