@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { UserProfile, SocialPlatform, connectSocialAccount, disconnectSocialAccount } from "@/utils/userData";
 import { Instagram, Youtube, Twitter, Twitch, Link as LinkIcon, CheckCircle, XCircle, Loader2, Video } from "lucide-react";
-import { motion } from "framer-motion"; // Confirmed: This import is crucial and must be here
+import { motion } from "framer-motion"; // This import is crucial for 'motion.div'
 import { showSuccess, showError } from "@/utils/toast";
 
 interface SocialAccountsLinkingProps {
