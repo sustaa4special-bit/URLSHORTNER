@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import SubmitClipForm from "@/components/SubmitClipForm";
-import { ArrowRight, Filter, Search, XCircle, DollarSign, CheckCircle, Clock, AlertTriangle, Loader2, Eye, ThumbsUp, MessageSquare } from "lucide-react";
+import { ArrowRight, Filter, Search, XCircle, DollarSign, CheckCircle, Clock, AlertTriangle, Loader2, Eye, ThumbsUp, MessageSquare, Hourglass } from "lucide-react";
 import { getAppliedCampaigns, getAppliedCampaignById } from "@/utils/appliedCampaigns";
 import { useWallet } from "@/hooks/use-wallet";
 
