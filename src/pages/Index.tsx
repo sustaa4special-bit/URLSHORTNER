@@ -6,7 +6,8 @@ import HeroSection from "@/components/HeroSection";
 import FeatureHighlights from "@/components/FeatureHighlights";
 import HowItWorks from "@/components/HowItWorks";
 import Testimonials from "@/components/Testimonials";
-import CallToAction from "@/components/CallToAction"; // Import the new component
+import CallToAction from "@/components/CallToAction";
+import Footer from "@/components/Footer"; // Import the new component
 
 const Index = () => {
   return (
@@ -16,7 +17,8 @@ const Index = () => {
       <FeatureHighlights />
       <HowItWorks />
       <Testimonials />
-      <CallToAction /> {/* Add the CallToAction component here */}
+      <CallToAction />
+      <Footer /> {/* Add the Footer component here */}
       <MadeWithDyad />
     </div>
   );
