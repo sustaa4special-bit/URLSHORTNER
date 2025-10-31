@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react"; // Import useState
 import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Instagram, Youtube, Video, DollarSign, CalendarDays, Users, CheckCircle } from "lucide-react";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog"; // Import Dialog components
+import CampaignApplicationForm from "@/components/CampaignApplicationForm"; // Import the new form
 
 interface Campaign {
   id: string;
@@ -171,6 +173,7 @@ const getPlatformIcon = (platform: 'TikTok' | 'Instagram' | 'YouTube Shorts') =>
 const CampaignDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const campaign = allCampaigns.find((c) => c.id === id);
+  const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog open/close
 
   if (!campaign) {
     return (
@@ -278,9 +281,18 @@ const CampaignDetailsPage = () => {
               </div>
 
               <div className="pt-6">
-                <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-full text-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-                  Apply Now
-                </Button>
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-full text-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                      Apply Now
+                    </Button>
+                  </DialogTrigger>
+                  <CampaignApplicationForm
+                    campaignId={campaign.id}
+                    campaignHeadline={campaign.headline}
+                    onClose={() => setIsDialogOpen(false)}
+                  />
+                </Dialog>
               </div>
             </CardContent>
           </Card>
