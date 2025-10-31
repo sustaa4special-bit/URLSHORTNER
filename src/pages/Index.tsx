@@ -4,6 +4,7 @@ import { MadeWithDyad } from "@/components/made-with-dyad";
 import Navbar from "@/components/Navbar";
 import HeroSection from "@/components/HeroSection";
 import FeatureHighlights from "@/components/FeatureHighlights";
+import HowItWorks from "@/components/HowItWorks"; // Import the new component
 
 const Index = () => {
   return (
@@ -11,6 +12,7 @@ const Index = () => {
       <Navbar />
       <HeroSection />
       <FeatureHighlights />
+      <HowItWorks /> {/* Add the HowItWorks component here */}
       <MadeWithDyad />
     </div>
   );
