@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import CampaignCard from "@/components/CampaignCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowRight, Filter, XCircle } from "lucide-react";
+import { allAvailableCampaigns } from "@/utils/campaignData"; // Import the full campaign data
+import { isCampaignApplied } from "@/utils/appliedCampaigns"; // Import utility to check applied status
 
 interface Campaign {
   id: string;
@@ -27,89 +29,10 @@ interface Campaign {
   brandLogo?: string;
 }
 
-const initialCampaigns: Campaign[] = [
-  {
-    id: "campaign-1",
-    brandName: "Glowify Skincare",
-    headline: "Create a skincare reel showing morning glow results",
-    platforms: ['TikTok'],
-    payout: "$25 per approved clip",
-    payoutValue: 25,
-    payoutUnit: 'clip',
-    deadline: "Nov 30, 2025",
-    deadlineDate: new Date("2025-11-30"),
-    spotsLeft: 12,
-    status: 'Open',
-  },
-  {
-    id: "campaign-2",
-    brandName: "Nova Tech",
-    headline: "Review our new smart home device on Instagram",
-    platforms: ['Instagram'],
-    payout: "$0.03 per view",
-    payoutValue: 0.03,
-    payoutUnit: 'view',
-    deadline: "Dec 12, 2025",
-    deadlineDate: new Date("2025-12-12"),
-    spotsLeft: 5,
-    status: 'Closing Soon',
-  },
-  {
-    id: "campaign-3",
-    brandName: "Blendr Energy",
-    headline: "Showcase Blendr Energy drink in your workout routine",
-    platforms: ['TikTok', 'YouTube Shorts'],
-    payout: "$15 per approved clip",
-    payoutValue: 15,
-    payoutUnit: 'clip',
-    deadline: "Dec 5, 2025",
-    deadlineDate: new Date("2025-12-05"),
-    spotsLeft: 20,
-    status: 'Open',
-  },
-  {
-    id: "campaign-4",
-    brandName: "EcoWear Apparel",
-    headline: "Sustainable fashion haul for your audience",
-    platforms: ['Instagram', 'TikTok'],
-    payout: "$50 fixed fee",
-    payoutValue: 50,
-    payoutUnit: 'fixed',
-    deadline: "Jan 15, 2026",
-    deadlineDate: new Date("2026-01-15"),
-    spotsLeft: 8,
-    status: 'Open',
-  },
-  {
-    id: "campaign-5",
-    brandName: "GameSphere Studios",
-    headline: "First look at our new indie game on YouTube Shorts",
-    platforms: ['YouTube Shorts'],
-    payout: "$0.05 per view",
-    payoutValue: 0.05,
-    payoutUnit: 'view',
-    deadline: "Dec 20, 2025",
-    deadlineDate: new Date("2025-12-20"),
-    spotsLeft: 15,
-    status: 'Open',
-  },
-  {
-    id: "campaign-6",
-    brandName: "PetPal Treats",
-    headline: "Show your pet enjoying our new healthy treats",
-    platforms: ['TikTok', 'Instagram'],
-    payout: "$20 per approved clip",
-    payoutValue: 20,
-    payoutUnit: 'clip',
-    deadline: "Nov 28, 2025",
-    deadlineDate: new Date("2025-11-28"),
-    spotsLeft: 3,
-    status: 'Closing Soon',
-  },
-];
+const CAMPAIGNS_PER_LOAD = 6; // Number of campaigns to load at once
 
 const ExploreCampaignsPage = () => {
-  const [campaigns, setCampaigns] = useState<Campaign[]>(initialCampaigns);
+  const [displayedCampaigns, setDisplayedCampaigns] = useState<Campaign[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [selectedPayoutTypes, setSelectedPayoutTypes] = useState<string[]>([]);
@@ -117,10 +40,16 @@ const ExploreCampaignsPage = () => {
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("Newest");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadedCount, setLoadedCount] = useState(CAMPAIGNS_PER_LOAD);
 
   const allPlatforms = ['TikTok', 'Instagram', 'YouTube Shorts'];
   const allPayoutTypes = ['Per View', 'Per Approved Clip', 'Fixed'];
   const allStatuses = ['Open', 'Closing Soon', 'Completed'];
+
+  // Initial load of campaigns
+  useEffect(() => {
+    setDisplayedCampaigns(allAvailableCampaigns.slice(0, CAMPAIGNS_PER_LOAD));
+  }, []);
 
   const handlePlatformChange = (platform: string, checked: boolean) => {
     setSelectedPlatforms((prev) =>
@@ -147,11 +76,12 @@ const ExploreCampaignsPage = () => {
     setMinPayout([5]);
     setSelectedStatuses([]);
     setSortBy("Newest");
-    setCampaigns(initialCampaigns); // Reset to initial set
+    setDisplayedCampaigns(allAvailableCampaigns.slice(0, CAMPAIGNS_PER_LOAD)); // Reset to initial subset
+    setLoadedCount(CAMPAIGNS_PER_LOAD);
   };
 
   const filteredAndSortedCampaigns = useMemo(() => {
-    let filtered = campaigns.filter((campaign) => {
+    let filtered = allAvailableCampaigns.filter((campaign) => { // Filter from the full list
       const matchesSearch = searchTerm
         ? campaign.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           campaign.headline.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -195,56 +125,23 @@ const ExploreCampaignsPage = () => {
     }
 
     return filtered;
-  }, [campaigns, searchTerm, selectedPlatforms, selectedPayoutTypes, minPayout, selectedStatuses, sortBy]);
+  }, [searchTerm, selectedPlatforms, selectedPayoutTypes, minPayout, selectedStatuses, sortBy]);
+
+  // Effect to update displayed campaigns when filters/sort change
+  useEffect(() => {
+    setDisplayedCampaigns(filteredAndSortedCampaigns.slice(0, loadedCount));
+  }, [filteredAndSortedCampaigns, loadedCount]);
+
 
   const loadMoreCampaigns = () => {
     setIsLoadingMore(true);
     setTimeout(() => {
-      const newCampaigns: Campaign[] = [
-        {
-          id: `campaign-${campaigns.length + 1}`,
-          brandName: "TechGadget Co.",
-          headline: "Unbox and review our latest smart gadget",
-          platforms: ['YouTube Shorts'],
-          payout: "$30 per approved clip",
-          payoutValue: 30,
-          payoutUnit: 'clip',
-          deadline: "Feb 10, 2026",
-          deadlineDate: new Date("2026-02-10"),
-          spotsLeft: 18,
-          status: 'Open',
-        },
-        {
-          id: `campaign-${campaigns.length + 2}`,
-          brandName: "FitFuel Nutrition",
-          headline: "Show your fitness journey with FitFuel supplements",
-          platforms: ['Instagram'],
-          payout: "$0.04 per view",
-          payoutValue: 0.04,
-          payoutUnit: 'view',
-          deadline: "Jan 25, 2026",
-          deadlineDate: new Date("2026-01-25"),
-          spotsLeft: 7,
-          status: 'Closing Soon',
-        },
-        {
-          id: `campaign-${campaigns.length + 3}`,
-          brandName: "Artisan Coffee",
-          headline: "Morning routine featuring Artisan Coffee",
-          platforms: ['TikTok'],
-          payout: "$20 fixed fee",
-          payoutValue: 20,
-          payoutUnit: 'fixed',
-          deadline: "Mar 01, 2026",
-          deadlineDate: new Date("2026-03-01"),
-          spotsLeft: 10,
-          status: 'Open',
-        },
-      ];
-      setCampaigns((prev) => [...prev, ...newCampaigns]);
+      setLoadedCount((prevCount) => prevCount + CAMPAIGNS_PER_LOAD);
       setIsLoadingMore(false);
     }, 1500); // Simulate network delay
   };
+
+  const hasMoreCampaigns = loadedCount < filteredAndSortedCampaigns.length;
 
   return (
     <Layout>
@@ -371,14 +268,14 @@ const ExploreCampaignsPage = () => {
           </div>
 
           {/* Campaign Cards Grid */}
-          {filteredAndSortedCampaigns.length === 0 ? (
+          {displayedCampaigns.length === 0 ? (
             <div className="text-center text-gray-400 text-xl py-10">
               No campaigns found matching your criteria.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-              {filteredAndSortedCampaigns.map((campaign) => (
-                <CampaignCard key={campaign.id} campaign={campaign} />
+              {displayedCampaigns.map((campaign) => (
+                <CampaignCard key={campaign.id} campaign={campaign} isApplied={isCampaignApplied(campaign.id)} />
               ))}
             </div>
           )}
@@ -387,17 +284,19 @@ const ExploreCampaignsPage = () => {
           <div className="text-center">
             {isLoadingMore ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[...Array(3)].map((_, i) => (
+                {[...Array(CAMPAIGNS_PER_LOAD)].map((_, i) => (
                   <Skeleton key={i} className="h-64 w-full bg-gray-800/50 rounded-xl" />
                 ))}
               </div>
             ) : (
-              <Button
-                onClick={loadMoreCampaigns}
-                className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-full text-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-              >
-                Load More Campaigns <ArrowRight className="ml-2 h-5 w-5 inline-block" />
-              </Button>
+              hasMoreCampaigns && (
+                <Button
+                  onClick={loadMoreCampaigns}
+                  className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-full text-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+                >
+                  Load More Campaigns <ArrowRight className="ml-2 h-5 w-5 inline-block" />
+                </Button>
+              )
             )}
           </div>
         </div>

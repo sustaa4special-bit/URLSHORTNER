@@ -24,6 +24,7 @@ interface Campaign {
 
 interface CampaignCardProps {
   campaign: Campaign;
+  isApplied: boolean; // New prop to indicate if the user has applied
 }
 
 const getPlatformIcon = (platform: 'TikTok' | 'Instagram' | 'YouTube Shorts') => {
@@ -38,7 +39,7 @@ const getPlatformIcon = (platform: 'TikTok' | 'Instagram' | 'YouTube Shorts') =>
   }
 };
 
-const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
+const CampaignCard: React.FC<CampaignCardProps> = ({ campaign, isApplied }) => {
   const statusColor =
     campaign.status === 'Open'
       ? 'bg-green-500/20 text-green-400'
@@ -77,11 +78,17 @@ const CampaignCard: React.FC<CampaignCardProps> = ({ campaign }) => {
         )}
       </CardContent>
       <CardFooter>
-        <Button asChild className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-          <Link to={`/campaigns/${campaign.id}`}>
-            View Details <ArrowRight className="ml-2 h-4 w-4 inline-block" />
-          </Link>
-        </Button>
+        {isApplied ? (
+          <Button asChild className="w-full bg-green-600/80 text-white font-semibold py-2 px-6 rounded-full shadow-lg cursor-not-allowed opacity-90" disabled>
+            <span>Applied <CheckCircle className="ml-2 h-4 w-4 inline-block" /></span>
+          </Button>
+        ) : (
+          <Button asChild className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <Link to={`/campaigns/${campaign.id}`}>
+              View Details <ArrowRight className="ml-2 h-4 w-4 inline-block" />
+            </Link>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
