@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/ui/date-picker";
 import { showSuccess, showError } from "@/utils/toast";
 import { updateBrandCampaign, BrandCampaign, Platform } from "@/utils/brandCampaignData";
+import { Checkbox } from "@/components/ui/checkbox"; // Added Checkbox import
 
 interface EditCampaignFormProps {
   campaign: BrandCampaign;
