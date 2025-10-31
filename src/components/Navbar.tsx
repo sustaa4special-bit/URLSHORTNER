@@ -4,7 +4,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import MobileNav from "@/components/MobileNav";
-import ThemeToggle from "@/components/ThemeToggle"; // Import the new ThemeToggle component
+import ThemeToggle from "@/components/ThemeToggle";
 
 const Navbar = () => {
   return (
@@ -18,8 +18,8 @@ const Navbar = () => {
         <Link to="/brands" className="text-gray-300 hover:text-white transition-colors">
           Brands
         </Link>
-        <Link to="/creators" className="text-gray-300 hover:text-white transition-colors">
-          Creators
+        <Link to="/creator-dashboard" className="text-gray-300 hover:text-white transition-colors">
+          Dashboard
         </Link>
         <Link to="/explore-campaigns" className="text-gray-300 hover:text-white transition-colors">
           Explore Campaigns
@@ -35,10 +35,10 @@ const Navbar = () => {
             Start Campaign
           </Link>
         </Button>
-        <ThemeToggle /> {/* Add ThemeToggle here */}
+        <ThemeToggle />
       </div>
       <div className="md:hidden flex items-center gap-2"> {/* Mobile menu toggle and ThemeToggle */}
-        <ThemeToggle /> {/* Add ThemeToggle for mobile */}
+        <ThemeToggle />
         <MobileNav />
       </div>
     </nav>
