@@ -16,7 +16,7 @@ import CampaignApplicationForm from "@/components/CampaignApplicationForm";
 import SubmitClipForm from "@/components/SubmitClipForm";
 import CampaignStatsCard from "@/components/CampaignStatsCard";
 import CampaignVerificationSteps from "@/components/CampaignVerificationSteps";
-import { addAppliedCampaign, getAppliedCampaignById, isCampaignApplied, updateAppliedCampaign } from "@/utils/appliedCampaigns";
+import { addAppliedCampaign, getAppliedCampaignById, isCampaignApplied } from "@/utils/appliedCampaigns";
 import { allAvailableCampaigns } from "@/utils/campaignData";
 
 interface Campaign {
@@ -41,6 +41,7 @@ const getPlatformIcon = (platform: 'TikTok' | 'Instagram' | 'YouTube Shorts') =>
     case 'Instagram':
       return <Instagram className="h-4 w-4 mr-1" />;
     case 'YouTube Shorts':
+    case 'YouTube': // Added YouTube for robustness, though Shorts is primary
       return <Youtube className="h-4 w-4 mr-1" />;
     case 'TikTok':
     default:
@@ -360,7 +361,7 @@ const CampaignDetailsPage = () => {
                         campaignId={campaign.id}
                         campaignHeadline={campaign.headline}
                         campaignPayoutValue={campaign.payoutValue}
-                        campaignBrandName={campaign.brandName} {/* Pass brandName */}
+                        campaignBrandName={campaign.brandName}
                         onClose={() => setIsSubmitClipDialogOpen(false)}
                         onSubmitSuccess={handleSubmitClipSuccess}
                       />
