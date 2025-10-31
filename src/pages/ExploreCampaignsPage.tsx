@@ -2,17 +2,27 @@
 
 import React, { useState, useMemo, useEffect } from "react";
 import Layout from "@/components/Layout";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import CampaignCard from "@/components/CampaignCard";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowRight, Filter, XCircle } from "lucide-react";
-import { allAvailableCampaigns } from "@/utils/campaignData"; // Import the full campaign data
-import { isCampaignApplied } from "@/utils/appliedCampaigns"; // Import utility to check applied status
+import { ArrowRight, Filter } from "lucide-react";
+import { allAvailableCampaigns } from "@/utils/campaignData";
+import { isCampaignApplied } from "@/utils/appliedCampaigns";
+import CampaignCard from "@/components/CampaignCard";
+import CampaignFilterControls from "@/components/CampaignFilterControls"; // Import the new component
+import { useIsMobile } from "@/hooks/use-mobile"; // Import the useIsMobile hook
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface Campaign {
   id: string;
@@ -29,9 +39,10 @@ interface Campaign {
   brandLogo?: string;
 }
 
-const CAMPAIGNS_PER_LOAD = 6; // Number of campaigns to load at once
+const CAMPAIGNS_PER_LOAD = 6;
 
 const ExploreCampaignsPage = () => {
+  const isMobile = useIsMobile();
   const [displayedCampaigns, setDisplayedCampaigns] = useState<Campaign[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
@@ -41,12 +52,12 @@ const ExploreCampaignsPage = () => {
   const [sortBy, setSortBy] = useState<string>("Newest");
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [loadedCount, setLoadedCount] = useState(CAMPAIGNS_PER_LOAD);
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false); // For desktop collapsible
 
   const allPlatforms = ['TikTok', 'Instagram', 'YouTube Shorts'];
   const allPayoutTypes = ['Per View', 'Per Approved Clip', 'Fixed'];
   const allStatuses = ['Open', 'Closing Soon', 'Completed'];
 
-  // Initial load of campaigns
   useEffect(() => {
     setDisplayedCampaigns(allAvailableCampaigns.slice(0, CAMPAIGNS_PER_LOAD));
   }, []);
@@ -76,12 +87,11 @@ const ExploreCampaignsPage = () => {
     setMinPayout([5]);
     setSelectedStatuses([]);
     setSortBy("Newest");
-    setDisplayedCampaigns(allAvailableCampaigns.slice(0, CAMPAIGNS_PER_LOAD)); // Reset to initial subset
-    setLoadedCount(CAMPAIGNS_PER_LOAD);
+    setLoadedCount(CAMPAIGNS_PER_LOAD); // Reset loaded count on filter reset
   };
 
   const filteredAndSortedCampaigns = useMemo(() => {
-    let filtered = allAvailableCampaigns.filter((campaign) => { // Filter from the full list
+    let filtered = allAvailableCampaigns.filter((campaign) => {
       const matchesSearch = searchTerm
         ? campaign.brandName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           campaign.headline.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -114,20 +124,17 @@ const ExploreCampaignsPage = () => {
       return matchesSearch && matchesPlatforms && matchesPayoutType && matchesMinPayout && matchesStatus;
     });
 
-    // Sorting logic
     if (sortBy === "Newest") {
       filtered.sort((a, b) => b.deadlineDate.getTime() - a.deadlineDate.getTime());
     } else if (sortBy === "Highest Payout") {
       filtered.sort((a, b) => b.payoutValue - a.payoutValue);
     } else if (sortBy === "Trending") {
-      // For trending, we can simulate by prioritizing campaigns with more spots left or specific IDs
       filtered.sort((a, b) => b.spotsLeft - a.spotsLeft);
     }
 
     return filtered;
   }, [searchTerm, selectedPlatforms, selectedPayoutTypes, minPayout, selectedStatuses, sortBy]);
 
-  // Effect to update displayed campaigns when filters/sort change
   useEffect(() => {
     setDisplayedCampaigns(filteredAndSortedCampaigns.slice(0, loadedCount));
   }, [filteredAndSortedCampaigns, loadedCount]);
@@ -138,10 +145,29 @@ const ExploreCampaignsPage = () => {
     setTimeout(() => {
       setLoadedCount((prevCount) => prevCount + CAMPAIGNS_PER_LOAD);
       setIsLoadingMore(false);
-    }, 1500); // Simulate network delay
+    }, 1500);
   };
 
   const hasMoreCampaigns = loadedCount < filteredAndSortedCampaigns.length;
+
+  const filterControlsProps = {
+    searchTerm,
+    onSearchTermChange: setSearchTerm,
+    selectedPlatforms,
+    onPlatformChange: handlePlatformChange,
+    selectedPayoutTypes,
+    onPayoutTypeChange: handlePayoutTypeChange,
+    minPayout,
+    onMinPayoutChange: setMinPayout,
+    selectedStatuses,
+    onStatusChange: handleStatusChange,
+    sortBy,
+    onSortByChange: setSortBy,
+    onResetFilters: handleResetFilters,
+    allPlatforms,
+    allPayoutTypes,
+    allStatuses,
+  };
 
   return (
     <Layout>
@@ -155,117 +181,42 @@ const ExploreCampaignsPage = () => {
             <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-8 animate-in fade-in-0 slide-in-from-top-6 duration-700 delay-100">
               Discover verified brand campaigns. Create authentic clips. Get paid every Friday.
             </p>
-            <Input
-              type="text"
-              placeholder="Search by brand, payout, or platform..."
-              className="max-w-xl mx-auto bg-gray-800 border-gray-700 text-white placeholder:text-gray-400 py-3 px-4 rounded-full shadow-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 animate-in fade-in-0 zoom-in-95 duration-700 delay-200"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
           </div>
 
-          {/* Filter Bar */}
-          <div className="bg-gray-900/70 backdrop-blur-lg rounded-xl p-6 md:p-8 border border-gray-800 shadow-lg mb-12 animate-in fade-in-0 slide-in-from-bottom-8 duration-700 delay-300">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-white flex items-center">
-                <Filter className="h-6 w-6 mr-3 text-indigo-400" /> Filters
-              </h2>
-              <Button variant="ghost" onClick={handleResetFilters} className="text-gray-400 hover:text-white hover:bg-gray-700">
-                <XCircle className="h-4 w-4 mr-2" /> Reset Filters
-              </Button>
+          {/* Filter Bar - Responsive */}
+          {isMobile ? (
+            <div className="mb-8 flex justify-end animate-in fade-in-0 slide-in-from-bottom-8 duration-700 delay-200">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white font-semibold py-2 px-6 rounded-full text-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                    <Filter className="h-5 w-5 mr-2" /> Filters
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-gray-900 text-white border-l border-gray-700 overflow-y-auto">
+                  <SheetHeader className="mb-8">
+                    <SheetTitle className="text-2xl font-bold text-white text-left">Campaign Filters</SheetTitle>
+                  </SheetHeader>
+                  <CampaignFilterControls {...filterControlsProps} />
+                  <SheetClose asChild>
+                    <Button className="w-full mt-8 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-6 rounded-full shadow-lg">
+                      Apply Filters
+                    </Button>
+                  </SheetClose>
+                </SheetContent>
+              </Sheet>
             </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-              {/* Platform Filter */}
-              <div>
-                <Label className="text-gray-300 mb-2 block">Platform</Label>
-                <div className="space-y-2">
-                  {allPlatforms.map((platform) => (
-                    <div key={platform} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`platform-${platform}`}
-                        checked={selectedPlatforms.includes(platform)}
-                        onCheckedChange={(checked) => handlePlatformChange(platform, checked as boolean)}
-                        className="border-gray-600 data-[state=checked]:bg-indigo-600 data-[state=checked]:text-white"
-                      />
-                      <Label htmlFor={`platform-${platform}`} className="text-gray-200 cursor-pointer">
-                        {platform}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Payout Type Filter */}
-              <div>
-                <Label className="text-gray-300 mb-2 block">Payout Type</Label>
-                <div className="space-y-2">
-                  {allPayoutTypes.map((type) => (
-                    <div key={type} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`payout-type-${type}`}
-                        checked={selectedPayoutTypes.includes(type)}
-                        onCheckedChange={(checked) => handlePayoutTypeChange(type, checked as boolean)}
-                        className="border-gray-600 data-[state=checked]:bg-indigo-600 data-[state=checked]:text-white"
-                      />
-                      <Label htmlFor={`payout-type-${type}`} className="text-gray-200 cursor-pointer">
-                        {type}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Minimum Payout Slider */}
-              <div>
-                <Label className="text-gray-300 mb-4 block">Minimum Payout: ${minPayout[0]}</Label>
-                <Slider
-                  min={5}
-                  max={100}
-                  step={5}
-                  value={minPayout}
-                  onValueChange={setMinPayout}
-                  className="w-full [&>span:first-child]:h-2 [&>span:first-child]:bg-gray-700 [&>span:first-child>span]:bg-indigo-600 [&>span:first-child>span]:ring-offset-indigo-600"
-                  thumbClassName="h-5 w-5 bg-indigo-600 border-2 border-indigo-400"
-                />
-              </div>
-
-              {/* Campaign Status Filter */}
-              <div>
-                <Label className="text-gray-300 mb-2 block">Status</Label>
-                <div className="space-y-2">
-                  {allStatuses.map((status) => (
-                    <div key={status} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`status-${status}`}
-                        checked={selectedStatuses.includes(status)}
-                        onCheckedChange={(checked) => handleStatusChange(status, checked as boolean)}
-                        className="border-gray-600 data-[state=checked]:bg-indigo-600 data-[state=checked]:text-white"
-                      />
-                      <Label htmlFor={`status-${status}`} className="text-gray-200 cursor-pointer">
-                        {status}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Sort By */}
-              <div>
-                <Label className="text-gray-300 mb-2 block">Sort By</Label>
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-full bg-gray-800 border-gray-700 text-white hover:border-indigo-500 transition-colors">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-gray-800 border-gray-700 text-white">
-                    <SelectItem value="Newest" className="hover:bg-gray-700 focus:bg-gray-700">Newest</SelectItem>
-                    <SelectItem value="Highest Payout" className="hover:bg-gray-700 focus:bg-gray-700">Highest Payout</SelectItem>
-                    <SelectItem value="Trending" className="hover:bg-gray-700 focus:bg-gray-700">Trending</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
+          ) : (
+            <Collapsible open={isFilterPanelOpen} onOpenChange={setIsFilterPanelOpen} className="mb-12 animate-in fade-in-0 slide-in-from-bottom-8 duration-700 delay-200">
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white font-semibold py-2 px-6 rounded-md text-lg transition-all duration-300 ease-in-out transform hover:scale-105 mb-4">
+                  <Filter className="h-5 w-5 mr-2" /> {isFilterPanelOpen ? "Hide Filters" : "Show Filters"}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <CampaignFilterControls {...filterControlsProps} />
+              </CollapsibleContent>
+            </Collapsible>
+          )}
 
           {/* Campaign Cards Grid */}
           {displayedCampaigns.length === 0 ? (
