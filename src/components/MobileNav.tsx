@@ -53,6 +53,11 @@ const MobileNav = () => {
             </Link>
           </SheetClose>
           <SheetClose asChild>
+            <Link to="/analytics" className="hover:text-indigo-400 transition-colors text-left"> {/* New Analytics Link */}
+              Analytics
+            </Link>
+          </SheetClose>
+          <SheetClose asChild>
             <Link to="/login" className="hover:text-indigo-400 transition-colors text-left">
               Login
             </Link>
@@ -65,7 +70,7 @@ const MobileNav = () => {
             </Button>
           </SheetClose>
           <SheetClose asChild>
-            <Link to="/admin" className="hover:text-indigo-400 transition-colors text-left"> {/* Admin Link */}
+            <Link to="/admin" className="hover:text-indigo-400 transition-colors text-left">
               Admin Panel
             </Link>
           </SheetClose>

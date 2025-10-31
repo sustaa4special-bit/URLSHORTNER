@@ -30,6 +30,9 @@ const Navbar = () => {
         <Link to="/wallet" className="text-gray-300 hover:text-white transition-colors">
           My Wallet
         </Link>
+        <Link to="/analytics" className="text-gray-300 hover:text-white transition-colors"> {/* New Analytics Link */}
+          Analytics
+        </Link>
         <Link to="/login" className="text-gray-300 hover:text-white transition-colors">
           Login
         </Link>
@@ -38,7 +41,7 @@ const Navbar = () => {
             Start Campaign
           </Link>
         </Button>
-        <Link to="/admin" className="text-gray-300 hover:text-white transition-colors"> {/* Admin Link */}
+        <Link to="/admin" className="text-gray-300 hover:text-white transition-colors">
           Admin
         </Link>
         <ThemeToggle />

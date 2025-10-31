@@ -23,6 +23,8 @@ import AdminBrandsPage from "./pages/admin/AdminBrandsPage";
 import AdminSystemLogsPage from "./pages/admin/AdminSystemLogsPage";
 import AdminFraudAlertsPage from "./pages/admin/AdminFraudAlertsPage";
 import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+// Analytics Page
+import AnalyticsDashboardPage from "./pages/AnalyticsDashboardPage";
 
 
 const queryClient = new QueryClient();
@@ -44,6 +46,7 @@ const App = () => (
           <Route path="/campaigns/:id" element={<CampaignDetailsPage />} />
           <Route path="/creator-dashboard" element={<CreatorDashboardPage />} />
           <Route path="/wallet" element={<CreatorWalletPage />} />
+          <Route path="/analytics" element={<AnalyticsDashboardPage />} /> {/* New Analytics Route */}
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminDashboardPage />} />
