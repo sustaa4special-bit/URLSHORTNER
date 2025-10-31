@@ -11,6 +11,7 @@ import { ArrowLeft, Instagram, Youtube, Video, DollarSign, CalendarDays, Users, 
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import CampaignApplicationForm from "@/components/CampaignApplicationForm";
 import { addAppliedCampaign, isCampaignApplied } from "@/utils/appliedCampaigns"; // Import utility functions
+import { allAvailableCampaigns } from "@/utils/campaignData"; // Import the centralized campaign data
 
 interface Campaign {
   id: string;
@@ -29,136 +30,6 @@ interface Campaign {
   brandLogo?: string;
 }
 
-// Mock data - In a real app, this would come from an API call
-const allCampaigns: Campaign[] = [
-  {
-    id: "campaign-1",
-    brandName: "Glowify Skincare",
-    headline: "Create a skincare reel showing morning glow results",
-    description: "Glowify Skincare is looking for creators to showcase their new 'Radiant Glow Serum'. Create an authentic short-form video (TikTok) demonstrating your morning skincare routine, highlighting the serum's benefits and how it makes your skin feel. Focus on natural lighting and genuine reactions.",
-    requirements: [
-      "Minimum 15-second video",
-      "Include #GlowifyRadiant and #SkincareRoutine",
-      "Show product clearly in the video",
-      "Positive and authentic tone",
-      "Post within 7 days of campaign acceptance",
-    ],
-    platforms: ['TikTok'],
-    payout: "$25 per approved clip",
-    payoutValue: 25,
-    payoutUnit: 'clip',
-    deadline: "Nov 30, 2025",
-    deadlineDate: new Date("2025-11-30"),
-    spotsLeft: 12,
-    status: 'Open',
-  },
-  {
-    id: "campaign-2",
-    brandName: "Nova Tech",
-    headline: "Review our new smart home device on Instagram",
-    description: "Nova Tech is launching its innovative 'Smart Hub Pro' and needs tech-savvy creators to provide honest reviews. Create an Instagram Reel or Story demonstrating the device's features, ease of use, and how it integrates into your smart home setup. Emphasize user experience and key functionalities.",
-    requirements: [
-      "Minimum 30-second video (Reel) or 3-5 stories",
-      "Include #NovaSmartHub and #TechReview",
-      "Demonstrate at least 3 key features",
-      "Provide genuine feedback",
-      "Post within 10 days of receiving product",
-    ],
-    platforms: ['Instagram'],
-    payout: "$0.03 per view",
-    payoutValue: 0.03,
-    payoutUnit: 'view',
-    deadline: "Dec 12, 2025",
-    deadlineDate: new Date("2025-12-12"),
-    spotsLeft: 5,
-    status: 'Closing Soon',
-  },
-  {
-    id: "campaign-3",
-    brandName: "Blendr Energy",
-    headline: "Showcase Blendr Energy drink in your workout routine",
-    description: "Fuel your fitness with Blendr Energy! We're looking for energetic creators to integrate our new sugar-free energy drink into their workout or active lifestyle content. Show how Blendr gives you the boost you need to power through your day. Be creative and dynamic!",
-    requirements: [
-      "Minimum 20-second video",
-      "Include #BlendrEnergy and #WorkoutFuel",
-      "Visibly feature the Blendr Energy drink",
-      "High-energy and motivating content",
-      "Post within 5 days of campaign acceptance",
-    ],
-    platforms: ['TikTok', 'YouTube Shorts'],
-    payout: "$15 per approved clip",
-    payoutValue: 15,
-    payoutUnit: 'clip',
-    deadline: "Dec 5, 2025",
-    deadlineDate: new Date("2025-12-05"),
-    spotsLeft: 20,
-    status: 'Open',
-  },
-  {
-    id: "campaign-4",
-    brandName: "EcoWear Apparel",
-    headline: "Sustainable fashion haul for your audience",
-    description: "EcoWear Apparel is committed to sustainable fashion. We want creators to highlight our latest eco-friendly collection in a fashion haul or 'get ready with me' style video. Showcase the comfort, style, and ethical production of our clothing. Inspire your audience to make conscious fashion choices.",
-    requirements: [
-      "Minimum 60-second video",
-      "Include #EcoWearFashion and #SustainableStyle",
-      "Feature at least 3 EcoWear items",
-      "Discuss sustainability aspects",
-      "Post within 14 days of receiving products",
-    ],
-    platforms: ['Instagram', 'TikTok'],
-    payout: "$50 fixed fee",
-    payoutValue: 50,
-    payoutUnit: 'fixed',
-    deadline: "Jan 15, 2026",
-    deadlineDate: new Date("2026-01-15"),
-    spotsLeft: 8,
-    status: 'Open',
-  },
-  {
-    id: "campaign-5",
-    brandName: "GameSphere Studios",
-    headline: "First look at our new indie game on YouTube Shorts",
-    description: "GameSphere Studios is launching 'Pixel Quest', a retro-inspired adventure game. We're seeking gaming creators to provide a 'first look' or short gameplay highlight on YouTube Shorts. Showcase exciting moments, unique mechanics, and your initial impressions.",
-    requirements: [
-      "Minimum 30-second gameplay clip",
-      "Include #PixelQuest and #IndieGame",
-      "Showcase key gameplay features",
-      "Enthusiastic and engaging commentary",
-      "Post within 7 days of receiving early access code",
-    ],
-    platforms: ['YouTube Shorts'],
-    payout: "$0.05 per view",
-    payoutValue: 0.05,
-    payoutUnit: 'view',
-    deadline: "Dec 20, 2025",
-    deadlineDate: new Date("2025-12-20"),
-    spotsLeft: 15,
-    status: 'Open',
-  },
-  {
-    id: "campaign-6",
-    brandName: "PetPal Treats",
-    headline: "Show your pet enjoying our new healthy treats",
-    description: "PetPal Treats introduces a new line of organic, healthy pet treats! We need adorable pet creators to capture their furry friends enjoying our treats. Focus on the pet's reaction, the natural ingredients, and the joy it brings. Cute and heartwarming content is key!",
-    requirements: [
-      "Minimum 15-second video",
-      "Include #PetPalTreats and #HealthyPets",
-      "Clearly show the pet enjoying the treat",
-      "Highlight natural ingredients (optional voiceover)",
-      "Post within 7 days of receiving treats",
-    ],
-    platforms: ['TikTok', 'Instagram'],
-    payout: "$20 per approved clip",
-    payoutValue: 20,
-    payoutUnit: 'clip',
-    deadline: "Nov 28, 2025",
-    deadlineDate: new Date("2025-11-28"),
-    spotsLeft: 3,
-    status: 'Closing Soon',
-  },
-];
-
 const getPlatformIcon = (platform: 'TikTok' | 'Instagram' | 'YouTube Shorts') => {
   switch (platform) {
     case 'Instagram':
@@ -173,7 +44,7 @@ const getPlatformIcon = (platform: 'TikTok' | 'Instagram' | 'YouTube Shorts') =>
 
 const CampaignDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
-  const campaign = allCampaigns.find((c) => c.id === id);
+  const campaign = allAvailableCampaigns.find((c) => c.id === id); // Use centralized data
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [hasApplied, setHasApplied] = useState(false);
 
