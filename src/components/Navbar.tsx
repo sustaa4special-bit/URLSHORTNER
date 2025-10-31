@@ -3,7 +3,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import MobileNav from "@/components/MobileNav"; // Import the new MobileNav component
+import MobileNav from "@/components/MobileNav";
+import ThemeToggle from "@/components/ThemeToggle"; // Import the new ThemeToggle component
 
 const Navbar = () => {
   return (
@@ -31,8 +32,10 @@ const Navbar = () => {
             Start Campaign
           </Link>
         </Button>
+        <ThemeToggle /> {/* Add ThemeToggle here */}
       </div>
-      <div className="md:hidden"> {/* Mobile menu toggle */}
+      <div className="md:hidden flex items-center gap-2"> {/* Mobile menu toggle and ThemeToggle */}
+        <ThemeToggle /> {/* Add ThemeToggle for mobile */}
         <MobileNav />
       </div>
     </nav>
