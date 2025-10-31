@@ -16,6 +16,7 @@ import SubmitClipForm from "@/components/SubmitClipForm";
 import { ArrowRight, Filter, Search, XCircle, DollarSign, CheckCircle, Clock, AlertTriangle, Loader2, Eye, ThumbsUp, MessageSquare, Hourglass } from "lucide-react";
 import { getAppliedCampaigns, getAppliedCampaignById } from "@/utils/appliedCampaigns";
 import { useWallet } from "@/hooks/use-wallet";
+import { allAvailableCampaigns } from "@/utils/campaignData"; // Import allAvailableCampaigns
 
 interface AppliedCampaign {
   id: string;
@@ -272,6 +273,11 @@ const CreatorDashboardPage = () => {
                             statusColor = 'bg-gray-500/20 text-gray-400';
                         }
 
+                        // Find the full campaign details to get brandName
+                        const fullCampaignDetails = allAvailableCampaigns.find(c => c.id === campaign.id);
+                        const campaignBrandName = fullCampaignDetails?.brandName || campaign.brandName;
+
+
                         return (
                           <TableRow key={campaign.id} className="border-gray-800 hover:bg-gray-800/70 transition-colors">
                             <TableCell className="font-medium text-white">{campaign.brandName}</TableCell>
@@ -304,6 +310,7 @@ const CreatorDashboardPage = () => {
                                       campaignId={selectedCampaignForSubmission.id}
                                       campaignHeadline={selectedCampaignForSubmission.headline}
                                       campaignPayoutValue={selectedCampaignForSubmission.payoutValue}
+                                      campaignBrandName={campaignBrandName} {/* Pass campaignBrandName here */}
                                       onClose={() => setIsSubmitClipDialogOpen(false)}
                                       onSubmitSuccess={handleClipSubmissionSuccess}
                                     />
