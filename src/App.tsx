@@ -9,7 +9,8 @@ import BrandsPage from "./pages/BrandsPage";
 import CreatorsPage from "./pages/CreatorsPage";
 import HowItWorksPage from "./pages/HowItWorksPage";
 import LoginPage from "./pages/LoginPage";
-import ExploreCampaignsPage from "./pages/ExploreCampaignsPage"; // Import new page
+import ExploreCampaignsPage from "./pages/ExploreCampaignsPage";
+import CampaignDetailsPage from "./pages/CampaignDetailsPage"; // Import new page
 
 const queryClient = new QueryClient();
 
@@ -26,8 +27,8 @@ const App = () => (
           <Route path="/creators" element={<CreatorsPage />} />
           <Route path="/how-it-works" element={<HowItWorksPage />} />
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/explore-campaigns" element={<ExploreCampaignsPage />} /> {/* New route */}
-          <Route path="/campaigns/:id" element={<div className="min-h-screen flex items-center justify-center bg-gray-950 text-white text-2xl">Campaign Details Page (Coming Soon!)</div>} /> {/* Placeholder for campaign details */}
+          <Route path="/explore-campaigns" element={<ExploreCampaignsPage />} />
+          <Route path="/campaigns/:id" element={<CampaignDetailsPage />} /> {/* Render CampaignDetailsPage */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
