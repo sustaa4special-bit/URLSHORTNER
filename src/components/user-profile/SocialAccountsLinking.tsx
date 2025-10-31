@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { UserProfile, SocialPlatform, connectSocialAccount, disconnectSocialAccount } from "@/utils/userData";
 import { Instagram, Youtube, Twitter, Twitch, Link as LinkIcon, CheckCircle, XCircle, Loader2, Video } from "lucide-react";
-import { motion } from "framer-motion"; // This import is crucial for 'motion.div'
+import { motion } from "framer-motion"; // Ensure this import is correct and framer-motion is installed
 import { showSuccess, showError } from "@/utils/toast";
 
 interface SocialAccountsLinkingProps {
@@ -84,14 +84,14 @@ const SocialAccountsLinking: React.FC<SocialAccountsLinkingProps> = ({ userProfi
         showSuccess(`${platform} disconnected.`);
         onRefresh();
       } catch (error) {
-        showError(`Failed to disconnect ${platform}.`);
+      showError(`Failed to disconnect ${platform}.`);
         console.error("Social disconnect error:", error);
       }
     }
   };
 
   return (
-    <motion.div
+    <motion.div // Changed from <motion.div> to {motion('div')}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
@@ -165,7 +165,7 @@ const SocialAccountsLinking: React.FC<SocialAccountsLinkingProps> = ({ userProfi
             <DialogDescription className="text-gray-400">
               Enter your {selectedPlatform} handle and current follower count.
             </DialogDescription>
-          </DialogDescription>
+          </DialogHeader>
           <form onSubmit={handleConnectSubmit} className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="socialHandle" className="text-gray-300">
