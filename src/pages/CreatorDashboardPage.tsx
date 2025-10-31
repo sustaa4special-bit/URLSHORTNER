@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react"; // Import useEffect
+import React, { useState, useMemo, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -11,17 +11,20 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowRight, Filter, Search, XCircle } from "lucide-react";
-import { getAppliedCampaigns } from "@/utils/appliedCampaigns"; // Import utility function
+import { Dialog, DialogTrigger } from "@/components/ui/dialog"; // Import Dialog components
+import SubmitClipForm from "@/components/SubmitClipForm"; // Import new component
+import { ArrowRight, Filter, Search, XCircle, DollarSign, CheckCircle, Clock } from "lucide-react"; // Added icons
+import { getAppliedCampaigns } from "@/utils/appliedCampaigns";
 
 interface AppliedCampaign {
   id: string;
   brandName: string;
   headline: string;
   payout: string;
-  payoutValue: number; // Added for sorting
-  applicationDate: Date; // Changed to Date object for sorting
-  status: 'Pending Review' | 'Approved' | 'Rejected' | 'Completed';
+  payoutValue: number;
+  applicationDate: Date;
+  status: 'Pending Review' | 'Approved' | 'Rejected' | 'Completed' | 'Submitted';
+  clipUrl?: string;
 }
 
 const CreatorDashboardPage = () => {
@@ -29,11 +32,13 @@ const CreatorDashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<string>("Newest Application");
+  const [isSubmitClipDialogOpen, setIsSubmitClipDialogOpen] = useState(false);
+  const [selectedCampaignForSubmission, setSelectedCampaignForSubmission] = useState<AppliedCampaign | null>(null);
 
-  const allStatuses = ['Pending Review', 'Approved', 'Rejected', 'Completed'];
+
+  const allStatuses = ['Pending Review', 'Approved', 'Rejected', 'Completed', 'Submitted'];
 
   useEffect(() => {
-    // Load campaigns from localStorage when the component mounts
     setAppliedCampaigns(getAppliedCampaigns());
   }, []);
 
@@ -47,7 +52,13 @@ const CreatorDashboardPage = () => {
     setSearchTerm("");
     setSelectedStatuses([]);
     setSortBy("Newest Application");
-    setAppliedCampaigns(getAppliedCampaigns()); // Reset to initial loaded state
+    setAppliedCampaigns(getAppliedCampaigns());
+  };
+
+  const handleClipSubmissionSuccess = () => {
+    setAppliedCampaigns(getAppliedCampaigns()); // Refresh campaigns after submission
+    setIsSubmitClipDialogOpen(false);
+    setSelectedCampaignForSubmission(null);
   };
 
   const filteredAndSortedCampaigns = useMemo(() => {
@@ -66,7 +77,6 @@ const CreatorDashboardPage = () => {
       return matchesSearch && matchesStatus;
     });
 
-    // Sorting logic
     if (sortBy === "Newest Application") {
       filtered.sort((a, b) => b.applicationDate.getTime() - a.applicationDate.getTime());
     } else if (sortBy === "Oldest Application") {
@@ -77,6 +87,18 @@ const CreatorDashboardPage = () => {
 
     return filtered;
   }, [appliedCampaigns, searchTerm, selectedStatuses, sortBy]);
+
+  // Dashboard Summary Calculations
+  const totalEarnings = appliedCampaigns
+    .filter(c => c.status === 'Completed')
+    .reduce((sum, c) => sum + c.payoutValue, 0);
+
+  const pendingPayouts = appliedCampaigns
+    .filter(c => c.status === 'Approved' || c.status === 'Submitted')
+    .reduce((sum, c) => sum + c.payoutValue, 0);
+
+  const activeCampaigns = appliedCampaigns.filter(c => c.status === 'Approved' || c.status === 'Submitted').length;
+
 
   return (
     <Layout>
@@ -99,6 +121,31 @@ const CreatorDashboardPage = () => {
               />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             </div>
+          </div>
+
+          {/* Dashboard Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 animate-in fade-in-0 slide-in-from-bottom-8 duration-700 delay-200">
+            <Card className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 text-white shadow-xl p-6 flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl font-bold text-white mb-2">Total Earnings</CardTitle>
+                <CardDescription className="text-4xl font-extrabold text-indigo-400">${totalEarnings.toFixed(2)}</CardDescription>
+              </div>
+              <DollarSign className="h-10 w-10 text-indigo-500 opacity-70" />
+            </Card>
+            <Card className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 text-white shadow-xl p-6 flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl font-bold text-white mb-2">Pending Payouts</CardTitle>
+                <CardDescription className="text-4xl font-extrabold text-purple-400">${pendingPayouts.toFixed(2)}</CardDescription>
+              </div>
+              <Clock className="h-10 w-10 text-purple-500 opacity-70" />
+            </Card>
+            <Card className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 text-white shadow-xl p-6 flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl font-bold text-white mb-2">Active Campaigns</CardTitle>
+                <CardDescription className="text-4xl font-extrabold text-green-400">{activeCampaigns}</CardDescription>
+              </div>
+              <CheckCircle className="h-10 w-10 text-green-500 opacity-70" />
+            </Card>
           </div>
 
           {/* Filter and Sort Bar */}
@@ -194,6 +241,9 @@ const CreatorDashboardPage = () => {
                           case 'Completed':
                             statusColor = 'bg-blue-500/20 text-blue-400';
                             break;
+                          case 'Submitted':
+                            statusColor = 'bg-indigo-500/20 text-indigo-400';
+                            break;
                           default:
                             statusColor = 'bg-gray-500/20 text-gray-400';
                         }
@@ -210,11 +260,40 @@ const CreatorDashboardPage = () => {
                               </Badge>
                             </TableCell>
                             <TableCell className="text-right">
-                              <Button asChild variant="ghost" size="sm" className="text-indigo-400 hover:bg-gray-700 hover:text-white">
-                                <Link to={`/campaigns/${campaign.id}`}>
-                                  View <ArrowRight className="ml-1 h-4 w-4" />
-                                </Link>
-                              </Button>
+                              {campaign.status === 'Approved' ? (
+                                <Dialog open={isSubmitClipDialogOpen && selectedCampaignForSubmission?.id === campaign.id} onOpenChange={setIsSubmitClipDialogOpen}>
+                                  <DialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-green-400 hover:bg-gray-700 hover:text-white"
+                                      onClick={() => setSelectedCampaignForSubmission(campaign)}
+                                    >
+                                      Submit Clip
+                                    </Button>
+                                  </DialogTrigger>
+                                  {selectedCampaignForSubmission && (
+                                    <SubmitClipForm
+                                      campaignId={selectedCampaignForSubmission.id}
+                                      campaignHeadline={selectedCampaignForSubmission.headline}
+                                      onClose={() => setIsSubmitClipDialogOpen(false)}
+                                      onSubmitSuccess={handleClipSubmissionSuccess}
+                                    />
+                                  )}
+                                </Dialog>
+                              ) : campaign.status === 'Submitted' || campaign.status === 'Completed' ? (
+                                <Button asChild variant="ghost" size="sm" className="text-blue-400 hover:bg-gray-700 hover:text-white">
+                                  <a href={campaign.clipUrl} target="_blank" rel="noopener noreferrer">
+                                    View Clip <ArrowRight className="ml-1 h-4 w-4" />
+                                  </a>
+                                </Button>
+                              ) : (
+                                <Button asChild variant="ghost" size="sm" className="text-indigo-400 hover:bg-gray-700 hover:text-white">
+                                  <Link to={`/campaigns/${campaign.id}`}>
+                                    View <ArrowRight className="ml-1 h-4 w-4" />
+                                  </Link>
+                                </Button>
+                              )}
                             </TableCell>
                           </TableRow>
                         );

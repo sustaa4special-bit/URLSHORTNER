@@ -7,7 +7,8 @@ interface AppliedCampaign {
   payout: string;
   payoutValue: number;
   applicationDate: Date;
-  status: 'Pending Review' | 'Approved' | 'Rejected' | 'Completed';
+  status: 'Pending Review' | 'Approved' | 'Rejected' | 'Completed' | 'Submitted'; // Added 'Submitted'
+  clipUrl?: string; // Optional field for submitted clip URL
 }
 
 const LOCAL_STORAGE_KEY = "clipverse_applied_campaigns";
@@ -73,7 +74,7 @@ export const getAppliedCampaigns = (): AppliedCampaign[] => {
   return defaultAppliedCampaigns;
 };
 
-export const addAppliedCampaign = (campaign: Omit<AppliedCampaign, 'applicationDate' | 'status'>) => {
+export const addAppliedCampaign = (campaign: Omit<AppliedCampaign, 'applicationDate' | 'status' | 'clipUrl'>) => {
   if (typeof window === "undefined") {
     return;
   }
@@ -102,6 +103,19 @@ export const updateAppliedCampaignStatus = (campaignId: string, newStatus: Appli
   const currentCampaigns = getAppliedCampaigns();
   const updatedCampaigns = currentCampaigns.map(campaign =>
     campaign.id === campaignId ? { ...campaign, status: newStatus } : campaign
+  );
+  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedCampaigns));
+};
+
+export const submitClipForCampaign = (campaignId: string, clipUrl: string) => {
+  if (typeof window === "undefined") {
+    return;
+  }
+  const currentCampaigns = getAppliedCampaigns();
+  const updatedCampaigns = currentCampaigns.map(campaign =>
+    campaign.id === campaignId
+      ? { ...campaign, status: 'Submitted', clipUrl: clipUrl }
+      : campaign
   );
   localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedCampaigns));
 };
