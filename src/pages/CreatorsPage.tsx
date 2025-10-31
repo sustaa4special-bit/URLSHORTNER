@@ -1,15 +1,12 @@
 "use client";
 
 import React from "react";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import { MadeWithDyad } from "@/components/made-with-dyad";
+import Layout from "@/components/Layout";
 
 const CreatorsPage = () => {
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-      <Navbar />
-      <main className="flex-grow flex items-center justify-center p-6">
+    <Layout>
+      <div className="flex items-center justify-center p-6 min-h-[calc(100vh-var(--navbar-height)-var(--footer-height))]">
         <div className="text-center">
           <h1 className="text-4xl md:text-5xl font-extrabold mb-4">
             Creators
@@ -18,10 +15,8 @@ const CreatorsPage = () => {
             This is where creators can find campaigns and showcase their portfolio.
           </p>
         </div>
-      </main>
-      <Footer />
-      <MadeWithDyad />
-    </div>
+      </div>
+    </Layout>
   );
 };
 

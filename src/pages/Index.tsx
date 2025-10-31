@@ -1,26 +1,21 @@
 "use client";
 
-import { MadeWithDyad } from "@/components/made-with-dyad";
-import Navbar from "@/components/Navbar";
+import Layout from "@/components/Layout";
 import HeroSection from "@/components/HeroSection";
 import FeatureHighlights from "@/components/FeatureHighlights";
 import HowItWorks from "@/components/HowItWorks";
 import Testimonials from "@/components/Testimonials";
 import CallToAction from "@/components/CallToAction";
-import Footer from "@/components/Footer"; // Import the new component
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gray-950">
-      <Navbar />
+    <Layout>
       <HeroSection />
       <FeatureHighlights />
       <HowItWorks />
       <Testimonials />
       <CallToAction />
-      <Footer /> {/* Add the Footer component here */}
-      <MadeWithDyad />
-    </div>
+    </Layout>
   );
 };
 
