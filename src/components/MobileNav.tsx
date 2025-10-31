@@ -48,7 +48,7 @@ const MobileNav = () => {
             </Link>
           </SheetClose>
           <SheetClose asChild>
-            <Link to="/wallet" className="hover:text-indigo-400 transition-colors text-left"> {/* New Wallet Link */}
+            <Link to="/wallet" className="hover:text-indigo-400 transition-colors text-left">
               My Wallet
             </Link>
           </SheetClose>
@@ -59,10 +59,15 @@ const MobileNav = () => {
           </SheetClose>
           <SheetClose asChild>
             <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 mt-4">
-              <Link to="/brands"> {/* Link to Brand Dashboard */}
+              <Link to="/brands">
                 Start Campaign
               </Link>
             </Button>
+          </SheetClose>
+          <SheetClose asChild>
+            <Link to="/admin" className="hover:text-indigo-400 transition-colors text-left"> {/* Admin Link */}
+              Admin Panel
+            </Link>
           </SheetClose>
         </nav>
       </SheetContent>
