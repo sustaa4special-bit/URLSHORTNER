@@ -3,6 +3,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import MobileNav from "@/components/MobileNav"; // Import the new MobileNav component
 
 const Navbar = () => {
   return (
@@ -12,7 +13,7 @@ const Navbar = () => {
           Clipverse
         </Link>
       </div>
-      <div className="hidden md:flex items-center space-x-8">
+      <div className="hidden md:flex items-center space-x-8"> {/* Desktop navigation */}
         <Link to="/brands" className="text-gray-300 hover:text-white transition-colors">
           Brands
         </Link>
@@ -25,11 +26,15 @@ const Navbar = () => {
         <Link to="/login" className="text-gray-300 hover:text-white transition-colors">
           Login
         </Link>
-        <Button className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-          Start Campaign
+        <Button asChild className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <Link to="/login">
+            Start Campaign
+          </Link>
         </Button>
       </div>
-      {/* Mobile menu toggle would go here */}
+      <div className="md:hidden"> {/* Mobile menu toggle */}
+        <MobileNav />
+      </div>
     </nav>
   );
 };
