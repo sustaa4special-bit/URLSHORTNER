@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { UserProfile, changeUserPassword, updateSecurityPreferences } from "@/utils/userData";
 import { Lock, Bell, Mail, Shield, KeyRound } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // <--- ADDED THIS IMPORT
 import { showSuccess, showError } from "@/utils/toast";
 
 interface SecurityPreferencesProps {

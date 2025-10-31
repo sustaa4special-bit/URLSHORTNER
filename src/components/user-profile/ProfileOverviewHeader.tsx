@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { UserProfile, VerificationStatus } from "@/utils/userData";
 import { CheckCircle, AlertTriangle, Hourglass, XCircle, Edit, Settings } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // <--- ADDED THIS IMPORT
 
 interface CreatorStats {
   campaignsJoined: number;

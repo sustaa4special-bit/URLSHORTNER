@@ -15,7 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Trash2, AlertTriangle } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // <--- ADDED THIS IMPORT
 import { deleteUserAccount } from "@/utils/userData";
 import { showSuccess, showError } from "@/utils/toast";
 import { useNavigate } from "react-router-dom";

@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { UserProfile, PayoutMethodType, updatePayoutMethod } from "@/utils/userData";
 import { getWithdrawalTransactions, WithdrawalTransaction } from "@/utils/walletData"; // Re-using withdrawal transactions for log
 import { DollarSign, CreditCard, Banknote, Bitcoin, History } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // <--- ADDED THIS IMPORT
 import { showSuccess, showError } from "@/utils/toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";

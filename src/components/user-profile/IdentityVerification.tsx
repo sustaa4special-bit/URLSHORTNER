@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { DatePicker } from "@/components/ui/date-picker";
 import { UserProfile, VerificationStatus, submitKycVerification } from "@/utils/userData";
 import { CheckCircle, AlertTriangle, Hourglass, XCircle, Upload, CalendarDays, MapPin, User } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // <--- ADDED THIS IMPORT
 import { showSuccess, showError } from "@/utils/toast";
 
 interface IdentityVerificationProps {

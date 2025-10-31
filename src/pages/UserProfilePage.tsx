@@ -18,6 +18,7 @@ import {
   UserProfile,
 } from "@/utils/userData";
 import { showSuccess, showError } from "@/utils/toast";
+import { motion } from "framer-motion"; // <--- ADDED THIS IMPORT
 
 const UserProfilePage = () => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);

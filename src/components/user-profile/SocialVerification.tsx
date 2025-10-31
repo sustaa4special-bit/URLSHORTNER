@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { UserProfile, VerificationStatus, getSocialVerificationStatus } from "@/utils/userData";
 import { CheckCircle, AlertTriangle, Hourglass, XCircle, Users } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // <--- ADDED THIS IMPORT
 
 interface SocialVerificationProps {
   userProfile: UserProfile;

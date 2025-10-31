@@ -7,7 +7,7 @@ import IdentityVerification from "@/components/user-profile/IdentityVerification
 import SocialVerification from "@/components/user-profile/SocialVerification";
 import { UserProfile } from "@/utils/userData";
 import { ShieldCheck } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // <--- ADDED THIS IMPORT
 
 interface VerificationCenterProps {
   userProfile: UserProfile;

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserProfile } from "@/utils/userData";
 import { CheckCircle, User, Mail, Globe, MessageSquare, Clock, Languages } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // <--- ADDED THIS IMPORT
 import { showSuccess, showError } from "@/utils/toast";
 
 interface PersonalInfoFormProps {
