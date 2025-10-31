@@ -13,9 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import SubmitClipForm from "@/components/SubmitClipForm";
-import { ArrowRight, Filter, Search, XCircle, DollarSign, CheckCircle, Clock, AlertTriangle, Loader2 } from "lucide-react";
+import { ArrowRight, Filter, Search, XCircle, DollarSign, CheckCircle, Clock, AlertTriangle, Loader2, Eye, ThumbsUp, MessageSquare } from "lucide-react";
 import { getAppliedCampaigns, getAppliedCampaignById } from "@/utils/appliedCampaigns";
-import { useWallet } from "@/hooks/use-wallet"; // Import useWallet
+import { useWallet } from "@/hooks/use-wallet";
 
 interface AppliedCampaign {
   id: string;
@@ -26,6 +26,7 @@ interface AppliedCampaign {
   applicationDate: Date;
   status: 'Pending Review' | 'Approved' | 'Rejected' | 'Completed' | 'Submitted' | 'Under Manual Review';
   clipUrl?: string;
+  submittedPlatform?: 'TikTok' | 'Instagram' | 'YouTube Shorts';
   verificationReason?: string;
 }
 
@@ -37,7 +38,7 @@ const CreatorDashboardPage = () => {
   const [isSubmitClipDialogOpen, setIsSubmitClipDialogOpen] = useState(false);
   const [selectedCampaignForSubmission, setSelectedCampaignForSubmission] = useState<AppliedCampaign | null>(null);
 
-  const { totalEarnings } = useWallet(); // Use the useWallet hook
+  const { totalEarnings } = useWallet();
 
   const allStatuses = ['Pending Review', 'Approved', 'Rejected', 'Completed', 'Submitted', 'Under Manual Review'];
 
@@ -59,7 +60,6 @@ const CreatorDashboardPage = () => {
   };
 
   const handleClipSubmissionSuccess = () => {
-    // Re-fetch campaigns to update the status after submission
     setAppliedCampaigns(getAppliedCampaigns());
     setIsSubmitClipDialogOpen(false);
     setSelectedCampaignForSubmission(null);
@@ -92,14 +92,26 @@ const CreatorDashboardPage = () => {
     return filtered;
   }, [appliedCampaigns, searchTerm, selectedStatuses, sortBy]);
 
+  const submittedClips = useMemo(() => {
+    return appliedCampaigns.filter(c => c.clipUrl && ['Submitted', 'Under Manual Review', 'Approved', 'Rejected', 'Completed'].includes(c.status));
+  }, [appliedCampaigns]);
+
   // Dashboard Summary Calculations
-  // totalEarnings now comes from useWallet hook
   const pendingPayouts = appliedCampaigns
     .filter(c => ['Approved', 'Submitted', 'Under Manual Review'].includes(c.status))
     .reduce((sum, c) => sum + c.payoutValue, 0);
 
   const activeCampaigns = appliedCampaigns.filter(c => ['Approved', 'Submitted', 'Under Manual Review'].includes(c.status)).length;
 
+  // Mock performance metrics for submitted clips
+  const getMockPerformance = (campaignId: string) => {
+    // Simple mock logic: higher payout campaigns might have higher mock views
+    const baseViews = 1000 + (campaignId.charCodeAt(campaignId.length - 1) % 10) * 500;
+    const views = Math.floor(baseViews * (1 + Math.random() * 0.5)); // +/- 50%
+    const likes = Math.floor(views * (0.05 + Math.random() * 0.15)); // 5-20% likes
+    const comments = Math.floor(likes * (0.1 + Math.random() * 0.3)); // 10-30% comments of likes
+    return { views, likes, comments };
+  };
 
   return (
     <Layout>
@@ -198,7 +210,8 @@ const CreatorDashboardPage = () => {
             </div>
           </div>
 
-          <Card className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 text-white shadow-xl p-6 md:p-8 animate-in fade-in-0 slide-in-from-bottom-8 duration-700 delay-400">
+          {/* Your Applied Campaigns Table */}
+          <Card className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 text-white shadow-xl p-6 md:p-8 mb-12 animate-in fade-in-0 slide-in-from-bottom-8 duration-700 delay-400">
             <CardHeader className="px-0 pt-0 pb-4">
               <CardTitle className="text-2xl font-bold text-white">Your Applied Campaigns</CardTitle>
               <CardDescription className="text-gray-400">
@@ -307,6 +320,100 @@ const CreatorDashboardPage = () => {
                                   <Link to={`/campaigns/${campaign.id}`}>
                                     View <ArrowRight className="ml-1 h-4 w-4" />
                                   </Link>
+                                </Button>
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* My Submitted Clips Table */}
+          <Card className="bg-gray-800/50 backdrop-blur-lg border border-gray-700 text-white shadow-xl p-6 md:p-8 animate-in fade-in-0 slide-in-from-bottom-8 duration-700 delay-500">
+            <CardHeader className="px-0 pt-0 pb-4">
+              <CardTitle className="text-2xl font-bold text-white">My Submitted Clips</CardTitle>
+              <CardDescription className="text-gray-400">
+                Track the performance and verification status of your submitted content.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-0 py-0">
+              {submittedClips.length === 0 ? (
+                <div className="text-center text-gray-400 py-8">
+                  You haven't submitted any clips yet. Apply to a campaign and get creating!
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-gray-700">
+                        <TableHead className="text-gray-300">Campaign</TableHead>
+                        <TableHead className="text-gray-300">Platform</TableHead>
+                        <TableHead className="text-gray-300">Status</TableHead>
+                        <TableHead className="text-gray-300 text-center">Performance</TableHead>
+                        <TableHead className="text-gray-300 text-right">Clip Link</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {submittedClips.map((clip) => {
+                        let statusColor = '';
+                        let statusIcon = null;
+                        switch (clip.status) {
+                          case 'Approved':
+                            statusColor = 'bg-green-500/20 text-green-400';
+                            statusIcon = <CheckCircle className="h-3 w-3 mr-1" />;
+                            break;
+                          case 'Pending Review': // Should not appear here if filtered for submitted clips
+                          case 'Submitted':
+                            statusColor = 'bg-indigo-500/20 text-indigo-400';
+                            statusIcon = <Loader2 className="h-3 w-3 mr-1 animate-spin" />;
+                            break;
+                          case 'Under Manual Review':
+                            statusColor = 'bg-orange-500/20 text-orange-400';
+                            statusIcon = <AlertTriangle className="h-3 w-3 mr-1" />;
+                            break;
+                          case 'Rejected':
+                            statusColor = 'bg-red-500/20 text-red-400';
+                            statusIcon = <XCircle className="h-3 w-3 mr-1" />;
+                            break;
+                          case 'Completed':
+                            statusColor = 'bg-blue-500/20 text-blue-400';
+                            statusIcon = <CheckCircle className="h-3 w-3 mr-1" />;
+                            break;
+                          default:
+                            statusColor = 'bg-gray-500/20 text-gray-400';
+                        }
+                        const performance = getMockPerformance(clip.id);
+
+                        return (
+                          <TableRow key={clip.id} className="border-gray-800 hover:bg-gray-800/70 transition-colors">
+                            <TableCell className="font-medium text-white">{clip.headline}</TableCell>
+                            <TableCell className="text-gray-300">{clip.submittedPlatform}</TableCell>
+                            <TableCell>
+                              <Badge className={`${statusColor} text-xs px-2 py-1 rounded-full flex items-center justify-center`}>
+                                {statusIcon} {clip.status}
+                              </Badge>
+                              {clip.verificationReason && (
+                                <p className="text-red-400 text-xs mt-1">{clip.verificationReason}</p>
+                              )}
+                            </TableCell>
+                            <TableCell className="text-gray-400 text-sm">
+                              <div className="flex items-center justify-center gap-2">
+                                <Eye className="h-4 w-4 text-blue-400" /> {performance.views.toLocaleString()}
+                                <ThumbsUp className="h-4 w-4 text-green-400" /> {performance.likes.toLocaleString()}
+                                <MessageSquare className="h-4 w-4 text-purple-400" /> {performance.comments.toLocaleString()}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              {clip.clipUrl && (
+                                <Button asChild variant="ghost" size="sm" className="text-blue-400 hover:bg-gray-700 hover:text-white">
+                                  <a href={clip.clipUrl} target="_blank" rel="noopener noreferrer">
+                                    View Clip <ArrowRight className="ml-1 h-4 w-4" />
+                                  </a>
                                 </Button>
                               )}
                             </TableCell>
