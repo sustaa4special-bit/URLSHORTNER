@@ -360,6 +360,7 @@ const CampaignDetailsPage = () => {
                         campaignId={campaign.id}
                         campaignHeadline={campaign.headline}
                         campaignPayoutValue={campaign.payoutValue}
+                        campaignBrandName={campaign.brandName} {/* Pass brandName */}
                         onClose={() => setIsSubmitClipDialogOpen(false)}
                         onSubmitSuccess={handleSubmitClipSuccess}
                       />

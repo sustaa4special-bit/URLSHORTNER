@@ -1,6 +1,6 @@
 "use client";
 
-import { addPayoutTransaction } from "./walletData"; // Import the new function
+import { addPayoutTransaction, updatePayoutTransactionStatus, getPayoutTransactions, PayoutStatus } from "./walletData"; // Import the new function
 
 interface AppliedCampaign {
   id: string;

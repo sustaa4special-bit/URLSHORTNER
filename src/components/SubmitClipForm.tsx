@@ -20,6 +20,7 @@ interface SubmitClipFormProps {
   campaignId: string;
   campaignHeadline: string;
   campaignPayoutValue: number; // New prop for payout value
+  campaignBrandName: string; // New prop for brand name
   onClose: () => void;
   onSubmitSuccess: () => void;
 }
@@ -28,6 +29,7 @@ const SubmitClipForm: React.FC<SubmitClipFormProps> = ({
   campaignId,
   campaignHeadline,
   campaignPayoutValue,
+  campaignBrandName, // Destructure new prop
   onClose,
   onSubmitSuccess,
 }) => {
@@ -47,7 +49,7 @@ const SubmitClipForm: React.FC<SubmitClipFormProps> = ({
     }
 
     // Simulate API call for submission and verification
-    simulateVerification(campaignId, clipUrl, selectedPlatform, campaignPayoutValue);
+    simulateVerification(campaignId, clipUrl, selectedPlatform, campaignPayoutValue, campaignHeadline, campaignBrandName);
 
     showSuccess(`Clip for "${campaignHeadline}" submitted for verification!`);
     setIsSubmitting(false);
