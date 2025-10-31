@@ -1,6 +1,7 @@
 "use client";
 
 import { addPayoutTransaction, updatePayoutTransactionStatus, getPayoutTransactions, PayoutStatus } from "./walletData"; // Import the new function
+import { recordCreatorSubmission } from "./brandCampaignData"; // Import the new function
 
 interface AppliedCampaign {
   id: string;
@@ -140,6 +141,10 @@ export const simulateVerification = (campaignId: string, clipUrl: string, platfo
     verificationReason: undefined, // Clear any previous reason
   });
 
+  // Record the submission on the brand's side
+  recordCreatorSubmission(campaignId, payoutValue, platform!, campaignHeadline, brandName);
+
+
   // Simulate API call delay
   setTimeout(() => {
     const random = Math.random();
@@ -151,13 +156,22 @@ export const simulateVerification = (campaignId: string, clipUrl: string, platfo
       newStatus = 'Approved';
       payoutStatus = 'Approved';
       // Add payout transaction
-      addPayoutTransaction({
-        campaignId,
-        campaignHeadline,
-        amount: payoutValue,
-        platform: platform!,
-        status: 'Approved',
-      });
+      // This is now handled by recordCreatorSubmission, but we need to update its status
+      const payouts = getPayoutTransactions();
+      const pendingPayout = payouts.find(p => p.campaignId === campaignId && p.status === 'Pending');
+      if (pendingPayout) {
+        updatePayoutTransactionStatus(pendingPayout.id, 'Approved');
+      } else {
+        // Fallback if for some reason it wasn't added as pending (shouldn't happen with recordCreatorSubmission)
+        addPayoutTransaction({
+          campaignId,
+          campaignHeadline,
+          amount: payoutValue,
+          platform: platform!,
+          status: 'Approved',
+        });
+      }
+
       // Simulate adding to wallet (this is now handled by addPayoutTransaction implicitly via getWalletSummary)
       // For useWallet hook, we still update total earnings directly for consistency with its current implementation
       const currentEarnings = parseFloat(localStorage.getItem(LOCAL_STORAGE_EARNINGS_KEY) || '0');
@@ -165,16 +179,14 @@ export const simulateVerification = (campaignId: string, clipUrl: string, platfo
 
     } else if (random < 0.8) { // 20% chance of manual review
       newStatus = 'Under Manual Review';
-      payoutStatus = 'Pending';
+      payoutStatus = 'Pending'; // Stays pending
       reason = 'Content requires manual review for authenticity.';
-      // Add pending payout transaction
-      addPayoutTransaction({
-        campaignId,
-        campaignHeadline,
-        amount: payoutValue,
-        platform: platform!,
-        status: 'Pending',
-      });
+      // Payout transaction should already be pending from recordCreatorSubmission
+      const payouts = getPayoutTransactions();
+      const pendingPayout = payouts.find(p => p.campaignId === campaignId && p.status === 'Pending');
+      if (pendingPayout) {
+        updatePayoutTransactionStatus(pendingPayout.id, 'Pending', reason);
+      }
     } else { // 20% chance of rejection
       newStatus = 'Rejected';
       payoutStatus = 'Rejected';
@@ -186,15 +198,22 @@ export const simulateVerification = (campaignId: string, clipUrl: string, platfo
         'Product not clearly visible',
       ];
       reason = reasons[Math.floor(Math.random() * reasons.length)];
-      // Add rejected payout transaction
-      addPayoutTransaction({
-        campaignId,
-        campaignHeadline,
-        amount: payoutValue,
-        platform: platform!,
-        status: 'Rejected',
-        verificationReason: reason,
-      });
+      // Update pending payout transaction to rejected
+      const payouts = getPayoutTransactions();
+      const pendingPayout = payouts.find(p => p.campaignId === campaignId && p.status === 'Pending');
+      if (pendingPayout) {
+        updatePayoutTransactionStatus(pendingPayout.id, 'Rejected', reason);
+      } else {
+        // Fallback if for some reason it wasn't added as pending
+        addPayoutTransaction({
+          campaignId,
+          campaignHeadline,
+          amount: payoutValue,
+          platform: platform!,
+          status: 'Rejected',
+          verificationReason: reason,
+        });
+      }
     }
 
     updateAppliedCampaign(campaignId, {

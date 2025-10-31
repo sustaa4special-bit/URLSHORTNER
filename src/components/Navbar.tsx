@@ -34,7 +34,7 @@ const Navbar = () => {
           Login
         </Link>
         <Button asChild className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold py-2 px-6 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-          <Link to="/login">
+          <Link to="/brands"> {/* Link to Brand Dashboard */}
             Start Campaign
           </Link>
         </Button>
